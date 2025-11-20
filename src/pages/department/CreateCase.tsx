@@ -1,0 +1,292 @@
+// src/pages/department/CreateCase.tsx
+
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+
+import { patientsService } from "@/api/patients.service";
+import { usersService } from "@/api/users.service";
+import { casesService } from "@/api/case.service";
+import { useToast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/store/authStore";
+
+// ------------------- VALIDATION ------------------- //
+
+const caseSchema = z.object({
+  patient: z.string().min(1, "Patient is required"),
+  assignedTo: z.string().optional()
+});
+
+// Small UI component
+const Info = ({ label, value }) => (
+  <div>
+    <Label className="text-muted-foreground">{label}</Label>
+    <p className="font-semibold">{value || "—"}</p>
+  </div>
+);
+
+const CreateCase = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const [patients, setPatients] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [patientInfo, setPatientInfo] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditingHistory, setIsEditingHistory] = useState(false);
+  const [cases, setCases] = useState([]);
+  const [availablePatients, setAvailablePatients] = useState([]);
+  
+
+
+
+
+  const { handleSubmit, setValue, watch } = useForm({
+    resolver: zodResolver(caseSchema),
+  });
+
+  const selectedPatient = watch("patient");
+
+  // Fetch patients + users
+useEffect(() => {
+  (async () => {
+    try {
+      const deptId = user?.department?._id;
+
+      // fetch data
+      const patientsData = await patientsService.getDepartmentPatientDetails(deptId);
+      const usersData = await usersService.getAll();
+      const casesData = await casesService.getByDepartment(deptId); // ✅ correct API
+
+      setCases(casesData);
+
+      // department filter
+      const filtered = patientsData.filter(
+        (p) =>
+          p.departmentAssignedTo === deptId ||
+          p.departmentAssignedTo?._id === deptId
+      );
+
+      setPatients(filtered);
+
+      // remove already-case patients
+      const noCasePatients = filtered.filter(
+  (p) => !casesData.some((c) => {
+    const casePatientId =
+      typeof c.patientId === "string" ? c.patientId : c.patientId?._id;
+
+    return casePatientId === p._id;
+  })
+);
+
+
+      setAvailablePatients(noCasePatients);
+      setUsers(usersData);
+
+    } catch (err) {
+      console.error("❌ ERROR WHILE LOADING:", err);
+      toast({
+        title: "Error",
+        description: "Failed to load data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
+
+
+  // Fetch Patient Details
+  useEffect(() => {
+    if (!selectedPatient) return setPatientInfo(null);
+
+    (async () => {
+      try {
+        const p = await patientsService.getById(selectedPatient);
+        setPatientInfo(p);
+
+        if (p.defaultProcedure) {
+          setValue("procedure", p.defaultProcedure);
+        }
+
+        if (p.scheduledAt) {
+          setValue("scheduledAt", new Date(p.scheduledAt).toISOString().slice(0, 16));
+        }
+      } catch (e) {
+        console.log("❌ Patient fetch failed", e);
+      }
+    })();
+  }, [selectedPatient]);
+
+  // Filter department users
+  useEffect(() => {
+    if (!users.length || !user?.department?._id) return;
+    const deptUsers = users.filter(
+      (u) =>
+        u.role === "department_user" &&
+        u?.department?._id === user.department._id
+    );
+    setFilteredUsers(deptUsers);
+  }, [users]);
+
+  // SUBMIT
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+
+    try {
+      if (patientInfo.paymentStatus !== "paid") {
+        toast({
+          title: "Payment Required",
+          description: "Please complete payment before opening a case.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const payload = {
+        patientId: data.patient,
+        department: user?.department?._id,
+        assignedTo: data.assignedTo || undefined
+      };
+
+      await casesService.create(payload);
+
+      toast({ title: "Success", description: "Case created successfully" });
+      navigate("/department/cases");
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to create case",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-2xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold">Create Case</h1>
+        <p className="text-muted-foreground">Open a new case for patient</p>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Case Details</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+              {/* PATIENT SELECT */}
+              <div className="space-y-2">
+                <Label>Patient *</Label>
+                <Select
+                  onValueChange={(v) => setValue("patient", v)}
+                  disabled={loading || isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePatients.map((p) => (
+  <SelectItem key={p._id} value={p._id}>
+    {p.firstName} {p.lastName} — {p.contact?.phone}
+  </SelectItem>
+))}
+
+                  </SelectContent>
+                </Select>
+              </div>
+
+
+              {/* PATIENT INFO */}
+              {patientInfo && (
+                <Card className="border shadow-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Patient Information</CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="grid grid-cols-2 gap-4 text-sm">
+
+                    <Info label="Patient ID" value={patientInfo.patientId} />
+                    <Info label="Name" value={`${patientInfo.firstName} ${patientInfo.lastName}`} />
+
+                    <Info label="Age" value={patientInfo.age} />
+                    <Info label="Gender" value={patientInfo.gender} />
+
+                    <Info label="Phone" value={patientInfo.contact?.phone} />
+                    <Info label="Email" value={patientInfo.contact?.email} />
+
+                    <Info label="Address" value={patientInfo.address} />
+                    <Info label="Referred Doctor" value={patientInfo.referredDoctor} />
+
+                    {/* PAYMENT STATUS */}
+                    <div>
+                      <Label className="text-muted-foreground">Payment Status</Label>
+                      <p
+                        className={`w-fit px-2 py-1 rounded text-white font-semibold
+                        ${patientInfo.paymentStatus === "paid" ? "bg-green-600" : "bg-red-600"}`}
+                      >
+                        {patientInfo.paymentStatus.toUpperCase()}
+                      </p>
+                    </div>
+
+                    <Info label="Case Type" value={patientInfo.caseType} />
+
+                    <Info label="Govt ID Type" value={patientInfo.govtId?.idType} />
+                    <Info label="Govt ID Number" value={patientInfo.govtId?.idNumber} />
+
+                    {/* CASE DESCRIPTION */}
+                    <div className="col-span-2">
+                      <Label>Case Description</Label>
+                      <p>{patientInfo.caseDescription}</p>
+                    </div>
+
+
+
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* BUTTONS */}
+              <div className="flex justify-end gap-4">
+                <Button variant="outline" onClick={() => navigate("/department/cases")}>
+                  Cancel
+                </Button>
+
+                <Button type="submit" disabled={isSubmitting || loading}>
+                  Create Case
+                </Button>
+              </div>
+
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default CreateCase;

@@ -1,12 +1,15 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-interface User {
+export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'admin' | 'reception' | 'department_user' | 'patient';
-  department?: string;
+  role: "super_admin" | "admin" | "reception" | "department_user" | "patient";
+  department?: {
+    _id: string;
+    name: string;
+  } | null;
   isActive: boolean;
 }
 
@@ -26,17 +29,15 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (token, user) => {
-        localStorage.setItem('auth-token', token);
         set({ token, user, isAuthenticated: true });
       },
 
       logout: () => {
-        localStorage.removeItem('auth-token');
         set({ token: null, user: null, isAuthenticated: false });
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
     }
   )
 );

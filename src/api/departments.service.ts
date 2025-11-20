@@ -1,34 +1,38 @@
-import axios from './axios';
+import api from "@/api/axios";
 
+export interface DepartmentPayload {
+  name: string;
+  code: string;
+  description?: string;
+  isActive?: boolean;   // <-- ADD THIS
+}
+
+// 🔥 YEH ADD KARNA ZARURI HAI
 export interface Department {
   _id: string;
   name: string;
   code: string;
   description?: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateDepartmentDto {
-  name: string;
-  code: string;
-  description?: string;
 }
 
 export const departmentsService = {
-  getAll: async (): Promise<Department[]> => {
-    const response = await axios.get('/api/departments');
-    return response.data;
+  getAll: async () => {
+    const res = await api.get("/api/departments");
+
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.data.departments)) return res.data.departments;
+
+    return [];
   },
 
-  create: async (data: CreateDepartmentDto): Promise<Department> => {
-    const response = await axios.post('/api/departments', data);
-    return response.data;
+  create: async (data: DepartmentPayload) => {
+    const res = await api.post("/api/departments", data);
+    return res.data;
   },
 
-  update: async (id: string, data: Partial<CreateDepartmentDto>): Promise<Department> => {
-    const response = await axios.put(`/api/departments/${id}`, data);
-    return response.data;
+  update: async (id: string, data: Partial<DepartmentPayload>) => {
+    const res = await api.put(`/api/departments/${id}`, data);
+    return res.data;
   },
 };

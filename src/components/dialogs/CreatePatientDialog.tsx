@@ -1,183 +1,327 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import {departmentsService} from "../../api/departments.service"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { forwardRef } from "react";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { patientsService, CreatePatientDto } from '@/api/patients.service';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { patientsService } from "@/api/patients.service";
+import { uploadService } from "@/api/upload.service";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
-const patientSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  dob: z.string(),
-  gender: z.enum(['male', 'female', 'other']),
-  phone: z.string().min(10, 'Phone must be at least 10 digits'),
-  email: z.string().email('Invalid email').optional().or(z.literal('')),
+/* --------------------------------------------------- */
+/* 🛑 ZOD VALIDATION                                   */
+/* --------------------------------------------------- */
+const schema = z.object({
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  age: z.coerce.number().min(1),
+  gender: z.string().min(1),
+  phone: z.string().min(10, "Must be 10 digits"),
+  email: z.string().optional(),
   address: z.string().optional(),
+  caseDescription: z.string().min(5),
+  caseType: z.string().min(1),
+  assignedDepartment: z.string().min(1),
+  referredDoctor: z.string().optional(),
+  govtIdType: z.string().min(2),
+  govtIdNumber: z.string().min(4),
 });
 
-type PatientForm = z.infer<typeof patientSchema>;
 
-interface CreatePatientDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
 
-const CreatePatientDialog = ({ open, onClose, onSuccess }: CreatePatientDialogProps) => {
+/* --------------------------------------------------- */
+/*  MAIN COMPONENT                                     */
+/* --------------------------------------------------- */
+export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const [govtFile, setGovtFile] = useState<File | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [departments, setDepartments] = useState([]);
+
+  
+  useEffect(() => {
+  const loadDeps = async () => {
+    const res = await departmentsService.getAll();
+    setDepartments(res);
+  };
+  loadDeps();
+}, []);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    reset,
     setValue,
-  } = useForm<PatientForm>({
-    resolver: zodResolver(patientSchema),
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: PatientForm) => {
-    setIsLoading(true);
+  /* --------------------------------------------------- */
+  /*  UPLOAD GOVT FILE TO CLOUDINARY                    */
+  /* --------------------------------------------------- */
+  const uploadGovIdFile = async () => {
+    if (!govtFile) return;
+    const url = await uploadService.uploadGovId(govtFile);
+    setFileUrl(url);
+    toast({
+      title: "Uploaded ☁",
+      description: "Govt ID uploaded successfully",
+    });
+  };
+
+
+
+  /* --------------------------------------------------- */
+  /*  FORM SUBMIT                                       */
+  /* --------------------------------------------------- */
+  const submit = async (data: any) => {
+    console.log("🔥 FORM DATA RECEIVED:", data);
+    if (!fileUrl) {
+      toast({ title: "Upload Govt ID", variant: "destructive" });
+      return;
+    }
+
+    console.log("SUBMITTED DATA:", data);
+
+    setLoading(true);
     try {
-      const payload: CreatePatientDto = {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dob: data.dob,
-        gender: data.gender,
-        contact: {
-          phone: data.phone,
-          email: data.email || undefined,
-          address: data.address || undefined,
-        },
-      };
+      const payload = {
+  firstName: data.firstName,
+  lastName: data.lastName,
+  age: data.age,
+  gender: data.gender,
+  address: data.address,
+
+  contact: { phone: data.phone, email: data.email },
+
+  caseDescription: data.caseDescription,
+  caseType: data.caseType,
+  referredDoctor: data.referredDoctor,
+
+  // 🔥 FIX: normalize department
+  assignedDepartment: data.assignedDepartment.trim().toLowerCase(),
+
+  govtId: {
+    idType: data.govtIdType,
+    idNumber: data.govtIdNumber,
+    fileUrl,
+  },
+};
+
 
       await patientsService.create(payload);
-      toast({
-        title: 'Success',
-        description: 'Patient registered successfully',
-      });
-      reset();
+      toast({ title: "Success", description: "Patient registered successfully" });
       onSuccess();
-    } catch (error: any) {
+    } catch (e) {
       toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to register patient',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to register patient",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  // console.log("FORM DATA =>", data);
+
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Register New Patient</DialogTitle>
-          <DialogDescription>Add a new patient to the system</DialogDescription>
+          <DialogTitle>Register Patient</DialogTitle>
+          <DialogDescription>Reception form - full details</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input id="firstName" {...register('firstName')} disabled={isLoading} />
-              {errors.firstName && (
-                <p className="text-sm text-destructive">{errors.firstName.message}</p>
-              )}
-            </div>
+        <form onSubmit={handleSubmit(submit)} className="space-y-4">
+          {/* BASIC INFO */}
+          <InputField label="First Name" {...register("firstName")} error={errors.firstName?.message} />
+          <InputField label="Last Name" {...register("lastName")} error={errors.lastName?.message} />
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name *</Label>
-              <Input id="lastName" {...register('lastName')} disabled={isLoading} />
-              {errors.lastName && (
-                <p className="text-sm text-destructive">{errors.lastName.message}</p>
-              )}
-            </div>
-          </div>
+          <InputField
+            label="Age"
+            type="number"
+            {...register("age", { valueAsNumber: true })}
+            error={errors.age?.message}
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dob">Date of Birth *</Label>
-              <Input id="dob" type="date" {...register('dob')} disabled={isLoading} />
-              {errors.dob && (
-                <p className="text-sm text-destructive">{errors.dob.message}</p>
-              )}
-            </div>
+         <SelectField
+  label="Gender"
+  items={["male", "female", "other"]}
+  onChange={(v) => setValue("gender", v, { shouldValidate: true })}
+  error={errors.gender?.message}
+/>
 
-            <div className="space-y-2">
-              <Label>Gender *</Label>
-              <Select
-                onValueChange={(value) => setValue('gender', value as any)}
-                disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.gender && (
-                <p className="text-sm text-destructive">{errors.gender.message}</p>
-              )}
-            </div>
-          </div>
+<div>
+  <Label>Assigned Department</Label>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone *</Label>
-            <Input id="phone" {...register('phone')} disabled={isLoading} />
-            {errors.phone && (
-              <p className="text-sm text-destructive">{errors.phone.message}</p>
-            )}
-          </div>
+  <Select onValueChange={(v) => setValue("assignedDepartment", v, { shouldValidate: true })}>
+    <SelectTrigger>
+      <SelectValue placeholder="Select Department" />
+    </SelectTrigger>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email')} disabled={isLoading} />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
+    <SelectContent>
+      {departments.map((dep) => (
+        <SelectItem key={dep._id} value={dep.name}>
+          {dep.name.replace(/\b\w/g, (c) => c.toUpperCase())}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Textarea id="address" {...register('address')} disabled={isLoading} />
-          </div>
+  {errors.assignedDepartment && (
+    <p className="text-xs text-red-500">{errors.assignedDepartment.message.toString()}</p>
+  )}
+</div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+
+
+
+          {/* CONTACT */}
+          <InputField label="Phone" {...register("phone")} error={errors.phone?.message} />
+          <InputField label="Email" {...register("email")} error={errors.email?.message} />
+
+          <TextAreaField label="Address" {...register("address")} error={errors.address?.message} />
+
+          <TextAreaField
+            label="Case Description"
+            {...register("caseDescription")}
+            error={errors.caseDescription?.message}
+          />
+          
+
+          {/* CASE DETAILS */}
+<SelectField
+  label="Case Type"
+  items={["Urgent", "Emergency", "Routine", "STAT"]}
+  onChange={(v) => setValue("caseType", v, { shouldValidate: true })}
+  error={errors.caseType?.message}
+/>
+
+<input type="hidden" {...register("caseType")} />
+
+
+
+
+          <InputField
+            label="Referred Doctor"
+            {...register("referredDoctor")}
+            error={errors.referredDoctor?.message}
+          />
+
+          {/* GOVT ID */}
+          <SelectField
+  label="Govt ID Type"
+  items={["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"]}
+  onChange={(v) => setValue("govtIdType", v)}
+  error={errors.govtIdType?.message}
+/>
+
+<InputField
+  label="Govt ID Number"
+  {...register("govtIdNumber")}
+  error={errors.govtIdNumber?.message}
+/>
+
+
+          {/* FILE UPLOAD */}
+          <Label>Upload Govt ID*</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setGovtFile(e.target.files?.[0] || null)}
+          />
+
+          {govtFile && (
+            <Button type="button" className="mt-2" onClick={uploadGovIdFile}>
+              Upload to Cloudinary ☁
+            </Button>
+          )}
+
+          {fileUrl && <p className="text-green-600 text-sm">Uploaded ✔</p>}
+          
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              Register Patient
+            <Button disabled={!fileUrl || isLoading} type="submit">
+              Register
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
-export default CreatePatientDialog;
+
+
+/* --------------------------------------------------- */
+/*  FIELD COMPONENTS                                   */
+/* --------------------------------------------------- */
+
+const InputField = forwardRef<HTMLInputElement, any>(
+  ({ label, error, ...props }, ref) => (
+    <div>
+      <Label>{label}</Label>
+      <Input ref={ref} {...props} />
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  )
+);
+
+export { InputField };
+
+
+const TextAreaField = forwardRef<HTMLTextAreaElement, any>(
+  ({ label, error, ...props }, ref) => (
+    <div>
+      <Label>{label}</Label>
+      <Textarea ref={ref} {...props} />
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  )
+);
+
+export { TextAreaField };
+
+
+const SelectField = ({ label, items, onChange, error }) => (
+  <div>
+    <Label>{label}</Label>
+    <Select onValueChange={onChange}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select" />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((v) => (
+          <SelectItem key={v} value={v}>
+            {v}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+    {error && <p className="text-xs text-red-500">{error}</p>}
+  </div>
+);

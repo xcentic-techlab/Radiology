@@ -1,19 +1,27 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { FileSearch, CheckCircle, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { reportsService, Report } from '@/api/reports.service';
-import { useAuthStore } from '@/store/authStore';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { CheckCircle, Clock } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { reportsService } from "@/api/reports.service";
+import { useAuthStore } from "@/store/authStore";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const DepartmentDashboard = () => {
   const { toast } = useToast();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
-    pendingCases: 0,
-    completedReports: 0,
-    inProgress: 0,
+    pending: 0,
+    approved: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -23,24 +31,31 @@ const DepartmentDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const reports = await reportsService.getAll();
-      // Filter reports for current department
-      const departmentReports = reports.filter(
-        (report) => report.department._id === user?.department
+      if (!user?.department?._id) {
+        setLoading(false);
+        return;
+      }
+
+      const reports = await reportsService.getByDepartment(
+        user.department._id
       );
 
-      setStats({
-        pendingCases: departmentReports.filter((r) => r.status === 'created').length,
-        inProgress: departmentReports.filter((r) => r.status === 'in_progress').length,
-        completedReports: departmentReports.filter((r) =>
-          ['report_uploaded', 'reviewed', 'approved'].includes(r.status)
-        ).length,
-      });
+ const approved = reports.filter(
+  (r) => r.status?.toLowerCase() === "approved"
+).length;
+
+const pending = reports.filter(
+  (r) => r.status?.toLowerCase() !== "approved"
+).length;
+
+
+
+      setStats({ pending, approved });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to load dashboard stats',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load dashboard stats",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -49,70 +64,76 @@ const DepartmentDashboard = () => {
 
   const statCards = [
     {
-      title: 'Pending Cases',
-      value: stats.pendingCases,
+      title: "Pending Reports",
+      value: stats.pending,
       icon: Clock,
-      color: 'text-warning',
+      color: "bg-yellow-100 text-yellow-600",
+      route: "/department/reports?status=pending",
     },
     {
-      title: 'In Progress',
-      value: stats.inProgress,
-      icon: FileSearch,
-      color: 'text-accent',
-    },
-    {
-      title: 'Completed',
-      value: stats.completedReports,
+      title: "Approved Reports",
+      value: stats.approved,
       icon: CheckCircle,
-      color: 'text-success',
+      color: "bg-green-100 text-green-600",
+      route: "/department/reports?status=approved",
     },
   ];
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
+
+        {/* ⭐ Top Header Section With Department Name */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Department Dashboard</h1>
-          <p className="text-muted-foreground">Manage your department cases</p>
+          <h1 className="text-3xl font-bold">Department Dashboard</h1>
+
+          <p className="text-muted-foreground mt-1">
+            Manage and track all your department reports
+          </p>
+
+          <div className="text-lg font-semibold text-primary mt-2">
+            Department:{" "}
+            <span className="font-bold">
+              {user?.department?.name || "Not Assigned"}
+            </span>
+          </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {statCards.map((stat, index) => (
             <motion.div
               key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card>
+              <Card
+                onClick={() => navigate(stat.route)}
+                className="rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-border/40"
+              >
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {loading ? '...' : stat.value}
+
+                  <div className={`p-2 rounded-full ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
                   </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {loading ? "..." : stat.value}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Click to view details
+                  </p>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
-
-        {/* Quick Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-center py-8">
-              View all cases in the Cases section
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );

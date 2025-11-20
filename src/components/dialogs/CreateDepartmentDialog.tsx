@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { departmentsService, CreateDepartmentDto } from '@/api/departments.service';
+import { DepartmentPayload, departmentsService } from '@/api/departments.service';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
@@ -46,7 +46,7 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
   const onSubmit = async (data: DepartmentForm) => {
     setIsLoading(true);
     try {
-      await departmentsService.create(data as CreateDepartmentDto);
+      await departmentsService.create(data as DepartmentPayload);
       toast({
         title: 'Success',
         description: 'Department created successfully',

@@ -1,4 +1,4 @@
-# MediPortal - Radiology & Hospital Management System
+# Radiology Portal - Radiology & Hospital Management System
 
 A modern, production-ready React frontend for managing hospital operations, radiology reports, and patient records. Built with React (Vite), TypeScript, TailwindCSS, and shadcn/ui components.
 

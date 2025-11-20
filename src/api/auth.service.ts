@@ -1,35 +1,17 @@
-import axios from './axios';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    role: 'super_admin' | 'admin' | 'reception' | 'department_user' | 'patient';
-    department?: string;
-    isActive: boolean;
-  };
-}
+import axios from "./axios";
 
 export const authService = {
-  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await axios.post('/api/auth/login', credentials);
-    return response.data;
+  login: async (credentials: { email: string; password: string }) => {
+    const res = await axios.post("/api/auth/login", credentials);
+    return res.data;
   },
 
-  getCurrentUser: async () => {
-    const response = await axios.get('/api/auth/me');
-    return response.data;
+  getMe: async () => {
+    const res = await axios.get("/api/auth/me");
+    return res.data;
   },
 
   logout: () => {
-    // Clear token from storage (handled by zustand store)
-    localStorage.removeItem('auth-token');
+    localStorage.removeItem("auth-token");
   },
 };

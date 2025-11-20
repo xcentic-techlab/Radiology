@@ -1,77 +1,67 @@
-import axios from './axios';
-
-export interface Report {
-  _id: string;
-  caseNumber: string;
-  patient: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-  };
-  department: {
-    _id: string;
-    name: string;
-  };
-  assignedTo?: {
-    _id: string;
-    name: string;
-  };
-  status: 'created' | 'in_progress' | 'report_uploaded' | 'reviewed' | 'approved' | 'cancelled' | 'paid';
-  procedure: string;
-  scheduledAt: string;
-  reportFile?: {
-    url: string;
-    filename: string;
-  };
-  findings?: string;
-  impression?: string;
-  paymentStatus: 'pending' | 'paid' | 'refunded';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateReportDto {
-  patient: string;
-  department: string;
-  assignedTo?: string;
-  procedure: string;
-  scheduledAt: string;
-}
+import axios from "./axios";
 
 export const reportsService = {
-  getAll: async (): Promise<Report[]> => {
-    const response = await axios.get('/api/reports');
-    return response.data;
+  list: async () => {
+    const res = await axios.get("/api/reports");
+    return res.data;
   },
 
-  getById: async (id: string): Promise<Report> => {
-    const response = await axios.get(`/api/reports/${id}`);
-    return response.data;
+  getAllForAdmin: async () => {
+    const res = await axios.get("/api/reports/department/all");
+    return res.data;
+  },
+  getAll: async () => {
+  const res = await axios.get("/api/reports");
+  return res.data;
+},
+
+
+  getByDepartment: async (deptId: string) => {
+    const res = await axios.get(`/api/reports/department/${deptId}`);
+    return res.data;
+  },
+  delete: async (id: string) => {
+  const res = await axios.delete(`/api/reports/${id}`);
+  return res.data;
+},
+
+
+  getDepartmentCases: async (deptId: string) => {
+    const res = await axios.get(`/api/reports/department/${deptId}`);
+    return res.data;
   },
 
-  create: async (data: CreateReportDto): Promise<Report> => {
-    const response = await axios.post('/api/reports', data);
-    return response.data;
+  getById: async (id: string) => {
+    const res = await axios.get(`/api/reports/${id}`);
+    return res.data;
   },
 
-  uploadReport: async (id: string, file: File): Promise<Report> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await axios.post(`/api/reports/${id}/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+  create: async (data: any) => {
+    const res = await axios.post("/api/reports/create", data);
+    return res.data;
   },
 
-  updateStatus: async (id: string, status: Report['status']): Promise<Report> => {
-    const response = await axios.patch(`/api/reports/${id}/status`, { status });
-    return response.data;
+  // 🔥 FIXED UPLOAD ROUTE
+uploadFile: async (reportId: string, file: File) => {
+  const fd = new FormData();
+  fd.append("file", file);
+
+  const res = await axios.post(`/api/reports/upload/${reportId}`, fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return res.data;
+},
+
+
+
+  update: async (id: string, data: any) => {
+    const res = await axios.put(`/api/reports/${id}`, data);
+    return res.data;
   },
 
-  updateFindings: async (id: string, data: { findings?: string; impression?: string }): Promise<Report> => {
-    const response = await axios.patch(`/api/reports/${id}/status`, data);
-    return response.data;
+  approve: async (id: string) => {
+    const res = await axios.post(`/api/reports/${id}/approve`);
+    return res.data;
   },
 };

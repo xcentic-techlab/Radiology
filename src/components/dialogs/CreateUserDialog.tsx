@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { usersService, CreateUserDto } from '@/api/users.service';
-import { Department } from '@/api/departments.service';
+import { usersService } from '@/api/users.service';
+import { departmentsService } from '@/api/departments.service';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
@@ -34,12 +34,19 @@ const userSchema = z.object({
 
 type UserForm = z.infer<typeof userSchema>;
 
+type Department = {
+  _id: string;
+  name: string;
+};
+
+
 interface CreateUserDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   departments: Department[];
 }
+
 
 const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserDialogProps) => {
   const { toast } = useToast();
@@ -59,7 +66,7 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
   const onSubmit = async (data: UserForm) => {
     setIsLoading(true);
     try {
-      await usersService.create(data as CreateUserDto);
+      await usersService.create(data);
       toast({
         title: 'Success',
         description: 'User created successfully',

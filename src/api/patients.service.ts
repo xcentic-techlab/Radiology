@@ -1,40 +1,108 @@
-import axios from './axios';
+
+import api from "@/api/axios";
+
 
 export interface Patient {
   _id: string;
   firstName: string;
   lastName: string;
-  dob: string;
-  gender: 'male' | 'female' | 'other';
-  contact: {
-    phone: string;
-    email?: string;
-    address?: string;
+  age?: number;
+  gender: string;
+  contact: { phone: string; email?: string };
+  caseType?: string;
+  caseDescription?: string;
+  paymentStatus: "pending" | "paid";
+  status: string;
+  assignedDepartment?: string;
+  departmentAssignedTo?: string;
+  govtId?: {
+    idType: string;
+    idNumber: string;
+    fileUrl?: string;
   };
-  createdAt: string;
-  updatedAt: string;
+  clinicalHistory?: string;
+  previousInjury?: string;
+  previousSurgery?: string;
+  patientId?: string;
+  referredDoctor?: string;
+  address?:string
+  createdAt?:string
 }
 
-export interface CreatePatientDto {
-  firstName: string;
-  lastName: string;
-  dob: string;
-  gender: 'male' | 'female' | 'other';
-  contact: {
-    phone: string;
-    email?: string;
-    address?: string;
-  };
-}
 
 export const patientsService = {
-  getAll: async (): Promise<Patient[]> => {
-    const response = await axios.get('/api/patients');
-    return response.data;
+  // 🟢 Already hoga
+  list: async () => {
+    const res = await api.get("/api/patients");
+    return res.data;
   },
 
-  create: async (data: CreatePatientDto): Promise<Patient> => {
-    const response = await axios.post('/api/patients', data);
-    return response.data;
+  getById: async (id: string) => {
+    const res = await api.get(`/api/patients/${id}`);
+    return res.data;
   },
+
+  // 🆕 YEH NAYA FUNCTION ADD KARO
+  update: async (id: string, data: any) => {
+    const res = await api.put(`/api/patients/${id}`, data);
+    return res.data;
+  },
+  
+  create: async (data: any) => {
+    const res = await api.post("/api/patients", data);
+    return res.data;
+  },
+  updatePayment: async (id:string) => {
+    return api.post(`/api/patients/${id}/payment`);
+  },
+
+assignDepartment: async (id, data) => {
+  return api.post(`/api/patients/${id}/assign-department`, data);
+},
+
+getDepartmentPatientDetails: async (patientId: string) => {
+  const res = await api.get(`/api/departments/${patientId}/patients`);
+  return res.data;
+},
+
+updateHistory: async (patientId: string, data: any) => {
+  const res = await api.put(`/api/departments/${patientId}/update-history`, data);
+  return res.data;
+},
+
+  getByDepartment: async (deptId: string) => {
+  const res = await api.get(`/api/patients/department/${deptId}`);
+  return res.data;
+},
+
 };
+
+
+// export const patientsService = {
+//   list: async () => {
+//     const res = await axios.get("/api/patients");
+//     return res.data;
+
+//   },
+
+
+//   create: async (data: any) => {
+//     const res = await axios.post("/api/patients", data);
+//     return res.data;
+//   },
+
+//   markPaid: async (id: string) => {
+//     const res = await axios.post(`/api/patients/${id}/payment`);
+//     return res.data;
+//   },
+
+//   assignDepartment: async (id: string, data: { departmentId: string; departmentName: string }) => {
+//     const res = await axios.post(`/api/patients/${id}/assign-department`, data);
+//     return res.data;
+//   },
+
+//   getDeptPatients: async (deptId: string) => {
+//     const res = await axios.get(`/api/departments/${deptId}/patients`);
+//     return res.data;
+//   },
+// };

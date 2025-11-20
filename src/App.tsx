@@ -6,51 +6,60 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import RoleGuard from "@/components/auth/RoleGuard";
 import { useAuthStore } from "@/store/authStore";
-
-// Auth
+import ReportsList from "./pages/department/ReportsList"
+import CreateCase from "./pages/department/CreateCase"
+/* ===================== AUTH ===================== */
 import Login from "@/pages/Login";
 
-// Admin
+/* ===================== ADMIN ===================== */
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Users from "@/pages/admin/Users";
 import Departments from "@/pages/admin/Departments";
 import Payments from "@/pages/admin/Payments";
+import AdminReports from "@/pages/admin/AdminReports";
+import EditReport from "@/pages/admin/EditReport";
+import AdminWorkload from "../src/pages/admin/AdminWorkload";
+import DepartmentWorkload from "@/pages/admin/DepartmentWorkload";
+import UsersFilter from "@/pages/admin/UsersFilter";
+import AdminReportsNew from "@/pages/admin/AdminReportsNew";
 
-// Reception
+
+/* ===================== RECEPTION ===================== */
 import ReceptionDashboard from "@/pages/reception/ReceptionDashboard";
 import Patients from "@/pages/reception/Patients";
-import CreateReport from "@/pages/reception/CreateReport";
 
-// Department
+/* ===================== SHARED ===================== */
+import CreateReport from "@/pages/department/CreateReport";
+
+/* ===================== DEPARTMENT ===================== */
 import DepartmentDashboard from "@/pages/department/DepartmentDashboard";
 import Cases from "@/pages/department/Cases";
 import ReportDetail from "@/pages/department/ReportDetail";
 
-// Patient
+/* ===================== PATIENT ===================== */
 import PatientReports from "@/pages/patient/PatientReports";
 import PatientReportDetail from "@/pages/patient/ReportDetail";
 
+/* ===================== MISC ===================== */
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/* ===================== AUTH REDIRECT LOGIC ===================== */
 const RootRedirect = () => {
   const { user, isAuthenticated } = useAuthStore();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Redirect to appropriate dashboard based on role
   const redirectMap: Record<string, string> = {
-    super_admin: '/admin/dashboard',
-    admin: '/admin/dashboard',
-    reception: '/reception/dashboard',
-    department_user: '/department/dashboard',
-    patient: '/patient/reports',
+    super_admin: "/admin/dashboard",
+    admin: "/admin/dashboard",
+    reception: "/reception/dashboard",
+    department_user: "/department/dashboard",
+    patient: "/patient/reports",
   };
 
-  return <Navigate to={redirectMap[user?.role || 'patient'] || '/login'} replace />;
+  return <Navigate to={redirectMap[user?.role || "patient"]} replace />;
 };
 
 const App = () => (
@@ -60,141 +69,251 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Root redirect */}
+          {/* ROOT ============================= */}
           <Route path="/" element={<RootRedirect />} />
 
-          {/* Auth */}
+          {/* LOGIN =========================== */}
           <Route path="/login" element={<Login />} />
 
-          {/* Admin Routes */}
+          {/* ===================== ADMIN ROUTES ===================== */}
           <Route
             path="/admin/dashboard"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['super_admin', 'admin']}>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
                   <AdminDashboard />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/users"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['super_admin', 'admin']}>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
                   <Users />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/departments"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['super_admin', 'admin']}>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
                   <Departments />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/admin/report/:id"
+  element={<ReportDetail />}
+/>
+
+<Route
+  path="/admin/workload"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["admin","super_admin"]}>
+        <AdminWorkload />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/workload/:departmentId"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["admin","super_admin"]}>
+        <DepartmentWorkload />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/users-filter"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["admin","super_admin"]}>
+        <UsersFilter />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
+{/* Replace existing admin reports route or add another path */}
+<Route
+  path="/admin/reports"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["admin","super_admin"]}>
+        <AdminReportsNew />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/admin/payments"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['super_admin', 'admin']}>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
                   <Payments />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
 
-          {/* Reception Routes */}
+          <Route
+  path="/department/reports"
+  element={<ReportsList />}
+/>
+
+
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
+                  <AdminReports />
+                </RoleGuard>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/edit-report/:id"
+            element={
+              <ProtectedRoute>
+                <RoleGuard allowedRoles={["admin", "super_admin"]}>
+                  <EditReport />
+                </RoleGuard>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ===================== RECEPTION ===================== */}
           <Route
             path="/reception/dashboard"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['reception']}>
+                <RoleGuard allowedRoles={["reception"]}>
                   <ReceptionDashboard />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/reception/patients"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['reception']}>
+                <RoleGuard allowedRoles={["reception"]}>
                   <Patients />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/reception/create-report"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['reception']}>
+                <RoleGuard allowedRoles={["reception"]}>
                   <CreateReport />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
 
-          {/* Department Routes */}
+          {/* ===================== DEPARTMENT ===================== */}
           <Route
             path="/department/dashboard"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['department_user']}>
+                <RoleGuard allowedRoles={["department_user"]}>
                   <DepartmentDashboard />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/department/cases"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['department_user']}>
+                <RoleGuard allowedRoles={["department_user"]}>
                   <Cases />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/department/report/:id"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['department_user']}>
+                <RoleGuard allowedRoles={["department_user"]}>
                   <ReportDetail />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
 
-          {/* Patient Routes */}
+          <Route
+  path="/department/create-report/:caseId"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["department_user", "admin", "super_admin"]}>
+        <CreateReport />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/department/create-cases"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["department_user"]}>
+        <CreateCase />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
+
+
+
+          {/* ===================== PATIENT ===================== */}
           <Route
             path="/patient/reports"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['patient']}>
+                <RoleGuard allowedRoles={["patient"]}>
                   <PatientReports />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/patient/report/:id"
             element={
               <ProtectedRoute>
-                <RoleGuard allowedRoles={['patient']}>
+                <RoleGuard allowedRoles={["patient"]}>
                   <PatientReportDetail />
                 </RoleGuard>
               </ProtectedRoute>
             }
           />
 
-          {/* 404 */}
+          {/* 404 ======================= */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

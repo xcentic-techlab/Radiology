@@ -1,48 +1,61 @@
-import axios from './axios';
+import axios from "./axios";
 
+// 🔥 Payment Type (Adjust as per your backend)
 export interface Payment {
   _id: string;
-  report: {
-    _id: string;
-    caseNumber: string;
-  };
+  patientId: string;
+  reportId: string | null;
   amount: number;
-  method: 'cash' | 'card' | 'online' | 'insurance';
-  status: 'pending' | 'success' | 'failed' | 'refunded';
+  method: "cash" | "upi" | "card" | "razorpay" | string;
+  status: "success" | "pending" | "failed";
   transactionId?: string;
-  madeBy: {
-    _id: string;
-    name: string;
-  };
+  madeBy: { _id: string; name: string };
   createdAt: string;
   updatedAt: string;
+  report:string;
+  caseNumber:number;
 }
 
-export interface CreatePaymentDto {
-  report: string;
+// 🔥 Create Payment Payload
+export interface CreatePaymentPayload {
+  patientId: string;
+  reportId?: string | null;
   amount: number;
-  method: 'cash' | 'card' | 'online' | 'insurance';
+  method: string;
+  status: string;
   transactionId?: string;
+  madeBy?: string; // user id
 }
 
 export const paymentsService = {
+
+  /** ✅ ADMIN → Get all payments */
   getAll: async (): Promise<Payment[]> => {
-    const response = await axios.get('/api/payments');
-    return response.data;
+    const res = await axios.get("/api/payments");
+    return res.data.payments ?? res.data;   // handles both formats
   },
 
+  /** ✅ Get payments for one report */
   getByReportId: async (reportId: string): Promise<Payment[]> => {
-    const response = await axios.get(`/api/payments/report/${reportId}`);
-    return response.data;
+    const res = await axios.get(`/api/payments/report/${reportId}`);
+    return res.data.payments ?? res.data;
   },
 
-  create: async (data: CreatePaymentDto): Promise<Payment> => {
-    const response = await axios.post('/api/payments', data);
-    return response.data;
+  /** ✅ Create a new payment (Reception/Auto) */
+  create: async (data: CreatePaymentPayload): Promise<Payment> => {
+    const res = await axios.post("/api/payments", data);
+    return res.data.payment ?? res.data;
   },
 
-  updateStatus: async (id: string, status: Payment['status']): Promise<Payment> => {
-    const response = await axios.patch(`/api/payments/${id}/status`, { status });
-    return response.data;
+  /** ✅ Update payment status (Success/Pending/Failed) */
+  updateStatus: async (id: string, status: string): Promise<Payment> => {
+    const res = await axios.patch(`/api/payments/${id}/status`, { status });
+    return res.data.payment ?? res.data;
+  },
+
+  /** 🚀 DEV MODE ONLY → Creates a fake payment entry */
+  fakePayment: async (patientId: string): Promise<Payment> => {
+    const res = await axios.post(`/api/payments/fake/${patientId}`);
+    return res.data.payment ?? res.data;
   },
 };

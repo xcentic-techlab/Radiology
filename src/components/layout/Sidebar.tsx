@@ -27,6 +27,7 @@ const Sidebar = () => {
         { to: '/admin/users', icon: Users, label: 'Users' },
         { to: '/admin/departments', icon: Building2, label: 'Departments' },
         { to: '/admin/payments', icon: CreditCard, label: 'Payments' },
+        { to: '/admin/reports', icon: FileText, label: 'All Reports' }
       ];
     }
 
@@ -34,14 +35,15 @@ const Sidebar = () => {
       return [
         { to: '/reception/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/reception/patients', icon: UserCircle, label: 'Patients' },
-        { to: '/reception/create-report', icon: FileText, label: 'Create Report' },
       ];
     }
 
     if (role === 'department_user') {
       return [
         { to: '/department/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/department/cases', icon: FileSearch, label: 'Cases' },
+        { to: '/department/cases', icon: FileSearch, label: 'Create Report' },
+        { to: '/department/create-cases', icon: FileText, label: 'Create Cases' }
+
       ];
     }
 
@@ -63,7 +65,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-2">
           <Activity className="h-8 w-8 text-sidebar-primary" />
           <div>
-            <h1 className="text-xl font-bold text-sidebar-foreground">MediPortal</h1>
+            <h1 className="text-xl font-bold text-sidebar-foreground">Radiology Portal</h1>
             <p className="text-xs text-sidebar-foreground/60">Radiology System</p>
           </div>
         </div>
