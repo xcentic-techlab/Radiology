@@ -66,60 +66,92 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create New Department</DialogTitle>
-          <DialogDescription>Add a new department to the hospital</DialogDescription>
-        </DialogHeader>
+  <DialogContent
+    className="
+      sm:max-w-md
+      rounded-2xl 
+      backdrop-blur-xl 
+      bg-white 
+      shadow-2xl 
+      border border-white/40
+    "
+  >
+    <DialogHeader className="text-center">
+      <DialogTitle className="text-2xl font-bold">Create New Department</DialogTitle>
+      <DialogDescription className="text-sm text-gray-600">
+        Add a new department to the hospital
+      </DialogDescription>
+    </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              placeholder="e.g., Radiology"
-              {...register('name')}
-              disabled={isLoading}
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
-          </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-          <div className="space-y-2">
-            <Label htmlFor="code">Code *</Label>
-            <Input
-              id="code"
-              placeholder="e.g., RAD"
-              {...register('code')}
-              disabled={isLoading}
-            />
-            {errors.code && (
-              <p className="text-sm text-destructive">{errors.code.message}</p>
-            )}
-          </div>
+      {/* Section: Basic Details */}
+      <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
+        <h2 className="font-semibold text-lg">Department Details</h2>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Brief description..."
-              {...register('description')}
-              disabled={isLoading}
-            />
-          </div>
+        {/* NAME */}
+        <div className="space-y-1">
+          <Label htmlFor="name">Name *</Label>
+          <Input
+            id="name"
+            placeholder="e.g., Radiology"
+            {...register("name")}
+            disabled={isLoading}
+            className="glass-input"
+          />
+          {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+        </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              Create Department
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        {/* CODE */}
+        <div className="space-y-1">
+          <Label htmlFor="code">Code *</Label>
+          <Input
+            id="code"
+            placeholder="e.g., RAD"
+            {...register("code")}
+            disabled={isLoading}
+            className="glass-input"
+          />
+          {errors.code && <p className="text-sm text-red-500">{errors.code.message}</p>}
+        </div>
+
+        {/* DESCRIPTION */}
+        <div className="space-y-1">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Brief description..."
+            {...register("description")}
+            disabled={isLoading}
+            className="glass-input"
+          />
+        </div>
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isLoading}
+          className="rounded-xl border-gray-300 hover:bg-gray-100"
+        >
+          Cancel
+        </Button>
+
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 text-white"
+        >
+          Create Department
+        </Button>
+      </div>
+    </form>
+  </DialogContent>
+</Dialog>
+
   );
 };
 

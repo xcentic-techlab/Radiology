@@ -80,63 +80,91 @@ const pending = reports.filter(
   ];
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
+  <DashboardLayout>
+    <div className="space-y-10">
 
-        {/* ⭐ Top Header Section With Department Name */}
-        <div>
-          <h1 className="text-3xl font-bold">Department Dashboard</h1>
+      {/* HEADER SECTION */}
+<div className="space-y-3">
 
-          <p className="text-muted-foreground mt-1">
-            Manage and track all your department reports
-          </p>
+  {/* CENTER HEADING */}
+  <div className="text-center">
+    <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
+      Department Dashboard
+    </h1>
 
-          <div className="text-lg font-semibold text-primary mt-2">
-            Department:{" "}
-            <span className="font-bold">
-              {user?.department?.name || "Not Assigned"}
-            </span>
-          </div>
-        </div>
+    <p className="text-muted-foreground text-base">
+      Manage and track all your department reports
+    </p>
+  </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {statCards.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+  {/* BADGE — BELOW HEADING, RIGHT SIDE */}
+  <div className="flex justify-end">
+    <div
+      className="px-5 py-2 rounded-xl 
+                 bg-white/60 backdrop-blur-md 
+                 border border-white/40 shadow-md"
+    >
+      <span className="text-sm font-semibold text-primary">
+        Department:{" "}
+        <span className="font-bold capitalize">
+          {user?.department?.name || "Not Assigned"}
+        </span>
+      </span>
+    </div>
+  </div>
+
+</div>
+
+
+
+      {/* STATS CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {statCards.map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.15 }}
+          >
+            <Card
+              onClick={() => navigate(stat.route)}
+              className="rounded-2xl cursor-pointer 
+                         bg-white/50 backdrop-blur-md 
+                         border border-white/40 shadow-lg 
+                         hover:shadow-xl hover:scale-[1.02]
+                         transition-all duration-300"
             >
-              <Card
-                onClick={() => navigate(stat.route)}
-                className="rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-border/40"
-              >
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-base font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
 
-                  <div className={`p-2 rounded-full ${stat.color}`}>
-                    <stat.icon className="h-5 w-5" />
-                  </div>
-                </CardHeader>
+                {/* Icon bubble */}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className={`p-2 rounded-full ${stat.color} shadow-sm`}
+                >
+                  <stat.icon className="h-6 w-6" />
+                </motion.div>
+              </CardHeader>
 
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {loading ? "..." : stat.value}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Click to view details
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+              <CardContent>
+                <div className="text-4xl font-extrabold tracking-tight">
+                  {loading ? "..." : stat.value}
+                </div>
+
+                <p className="text-sm text-muted-foreground mt-1">
+                  Click to view details
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
-    </DashboardLayout>
-  );
+    </div>
+  </DashboardLayout>
+);
+
 };
 
 export default DepartmentDashboard;

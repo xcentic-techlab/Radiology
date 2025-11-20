@@ -148,129 +148,195 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>Register Patient</DialogTitle>
-          <DialogDescription>Reception form - full details</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-h-[90vh] overflow-auto rounded-2xl backdrop-blur-xl bg-white shadow-2xl border border-white/30">
+  <DialogHeader className="text-center">
+    <DialogTitle className="text-2xl font-bold">Register Patient</DialogTitle>
+    <DialogDescription className="text-sm">
+      Reception form — enter all required details
+    </DialogDescription>
+  </DialogHeader>
 
-        <form onSubmit={handleSubmit(submit)} className="space-y-4">
-          {/* BASIC INFO */}
-          <InputField label="First Name" {...register("firstName")} error={errors.firstName?.message} />
-          <InputField label="Last Name" {...register("lastName")} error={errors.lastName?.message} />
+  {/* FORM */}
+  <form onSubmit={handleSubmit(submit)} className="space-y-6">
 
-          <InputField
-            label="Age"
-            type="number"
-            {...register("age", { valueAsNumber: true })}
-            error={errors.age?.message}
-          />
+    {/* ------------------------------------- */}
+    {/* BASIC DETAILS */}
+    {/* ------------------------------------- */}
+    <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
+      <h2 className="font-semibold text-lg">Basic Details</h2>
 
-         <SelectField
-  label="Gender"
-  items={["male", "female", "other"]}
-  onChange={(v) => setValue("gender", v, { shouldValidate: true })}
-  error={errors.gender?.message}
-/>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField className="glass-input" label="First Name" {...register("firstName")} error={errors.firstName?.message} />
+        <InputField className="glass-input" label="Last Name" {...register("lastName")} error={errors.lastName?.message} />
 
-<div>
-  <Label>Assigned Department</Label>
+        <InputField
+          label="Age"
+          type="number"
+          className="glass-input"
+          {...register("age", { valueAsNumber: true })}
+          error={errors.age?.message}
+        />
 
-  <Select onValueChange={(v) => setValue("assignedDepartment", v, { shouldValidate: true })}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select Department" />
-    </SelectTrigger>
-
-    <SelectContent>
-      {departments.map((dep) => (
-        <SelectItem key={dep._id} value={dep.name}>
-          {dep.name.replace(/\b\w/g, (c) => c.toUpperCase())}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-
-  {errors.assignedDepartment && (
-    <p className="text-xs text-red-500">{errors.assignedDepartment.message.toString()}</p>
-  )}
-</div>
+        <SelectField
+          label="Gender"
+          items={["male", "female", "other"]}
+          onChange={(v) => setValue("gender", v, { shouldValidate: true })}
+          error={errors.gender?.message}
+        />
+      </div>
+    </div>
 
 
+    {/* ------------------------------------- */}
+    {/* CONTACT */}
+    {/* ------------------------------------- */}
+    <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
+      <h2 className="font-semibold text-lg">Contact Details</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField className="glass-input" label="Phone" {...register("phone")} error={errors.phone?.message} />
+        <InputField className="glass-input" label="Email" {...register("email")} error={errors.email?.message} />
+      </div>
+
+      <TextAreaField
+        label="Address"
+        className="glass-input"
+        {...register("address")}
+        error={errors.address?.message}
+      />
+    </div>
 
 
-          {/* CONTACT */}
-          <InputField label="Phone" {...register("phone")} error={errors.phone?.message} />
-          <InputField label="Email" {...register("email")} error={errors.email?.message} />
+    {/* ------------------------------------- */}
+    {/* CASE DETAILS */}
+    {/* ------------------------------------- */}
+    <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
+      <h2 className="font-semibold text-lg">Case Details</h2>
 
-          <TextAreaField label="Address" {...register("address")} error={errors.address?.message} />
+      <TextAreaField
+        label="Case Description"
+        className="glass-input"
+        {...register("caseDescription")}
+        error={errors.caseDescription?.message}
+      />
 
-          <TextAreaField
-            label="Case Description"
-            {...register("caseDescription")}
-            error={errors.caseDescription?.message}
-          />
-          
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SelectField
+          label="Case Type"
+          items={["Urgent", "Emergency", "Routine", "STAT"]}
+          onChange={(v) => setValue("caseType", v, { shouldValidate: true })}
+          error={errors.caseType?.message}
+        />
 
-          {/* CASE DETAILS */}
-<SelectField
-  label="Case Type"
-  items={["Urgent", "Emergency", "Routine", "STAT"]}
-  onChange={(v) => setValue("caseType", v, { shouldValidate: true })}
-  error={errors.caseType?.message}
-/>
+        <InputField
+          label="Referred Doctor"
+          className="glass-input"
+          {...register("referredDoctor")}
+          error={errors.referredDoctor?.message}
+        />
+      </div>
 
-<input type="hidden" {...register("caseType")} />
+      {/* DEPARTMENT */}
+      <div>
+        <Label>Assigned Department</Label>
+        <Select
+          onValueChange={(v) =>
+            setValue("assignedDepartment", v, { shouldValidate: true })
+          }
+        >
+          <SelectTrigger className="glass-select rounded-xl">
+            <SelectValue placeholder="Select Department" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {departments.map((dep) => (
+              <SelectItem key={dep._id} value={dep.name}>
+                {dep.name.replace(/\b\w/g, (c) => c.toUpperCase())}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {errors.assignedDepartment && (
+          <p className="text-xs text-red-500">
+            {errors.assignedDepartment.message.toString()}
+          </p>
+        )}
+      </div>
+    </div>
 
 
+    {/* ------------------------------------- */}
+    {/* GOVT ID */}
+    {/* ------------------------------------- */}
+    <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
+      <h2 className="font-semibold text-lg">Government ID</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SelectField
+          label="Govt ID Type"
+          items={["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"]}
+          onChange={(v) => setValue("govtIdType", v)}
+          error={errors.govtIdType?.message}
+        />
+
+        <InputField
+          label="Govt ID Number"
+          className="glass-input"
+          {...register("govtIdNumber")}
+          error={errors.govtIdNumber?.message}
+        />
+      </div>
+
+      {/* Upload File */}
+      <div>
+        <Label>Upload Govt ID*</Label>
+        <Input
+          type="file"
+          accept="image/*"
+          className="glass-input"
+          onChange={(e) => setGovtFile(e.target.files?.[0] || null)}
+        />
+
+        {govtFile && (
+          <Button
+            type="button"
+            className="mt-3 rounded-lg bg-blue-600 text-white shadow-md hover:bg-blue-700"
+            onClick={uploadGovIdFile}
+          >
+            Upload to Cloudinary ☁
+          </Button>
+        )}
+
+        {fileUrl && <p className="text-green-600 text-sm mt-1">Uploaded ✔</p>}
+      </div>
+    </div>
 
 
-          <InputField
-            label="Referred Doctor"
-            {...register("referredDoctor")}
-            error={errors.referredDoctor?.message}
-          />
+    {/* ------------------------------------- */}
+    {/* ACTION BUTTONS */}
+    {/* ------------------------------------- */}
+    <div className="flex justify-end gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onClose}
+        className="rounded-xl"
+      >
+        Cancel
+      </Button>
 
-          {/* GOVT ID */}
-          <SelectField
-  label="Govt ID Type"
-  items={["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"]}
-  onChange={(v) => setValue("govtIdType", v)}
-  error={errors.govtIdType?.message}
-/>
+      <Button
+        disabled={!fileUrl || isLoading}
+        type="submit"
+        className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20"
+      >
+        Register
+      </Button>
+    </div>
+  </form>
+</DialogContent>
 
-<InputField
-  label="Govt ID Number"
-  {...register("govtIdNumber")}
-  error={errors.govtIdNumber?.message}
-/>
-
-
-          {/* FILE UPLOAD */}
-          <Label>Upload Govt ID*</Label>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setGovtFile(e.target.files?.[0] || null)}
-          />
-
-          {govtFile && (
-            <Button type="button" className="mt-2" onClick={uploadGovIdFile}>
-              Upload to Cloudinary ☁
-            </Button>
-          )}
-
-          {fileUrl && <p className="text-green-600 text-sm">Uploaded ✔</p>}
-          
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button disabled={!fileUrl || isLoading} type="submit">
-              Register
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
     </Dialog>
   );
 }

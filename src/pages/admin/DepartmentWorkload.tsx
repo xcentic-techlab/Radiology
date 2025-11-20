@@ -25,35 +25,43 @@ export default function DepartmentWorkload() {
     setLoading(true);
     try {
       const all = await reportsService.getAllForAdmin();
-      const depReports = (all || []).filter((r) => r.department?._id === departmentId || r.department === departmentId);
+
+      const depReports = (all || []).filter(
+        (r) =>
+          r.department?._id === departmentId ||
+          r.department === departmentId
+      );
+
       setReports(depReports);
 
-      // fetch patient details for counts (fetch only unique)
+      // fetch unique patient details
       const uniquePatientIds = [
-  ...new Set(
-    depReports
-      .map((r) => (r.patient?._id || r.patient) as string)
-      .filter(Boolean)
-  ),
-];
+        ...new Set(
+          depReports
+            .map((r) => r.patient?._id || r.patient)
+            .filter(Boolean)
+        ),
+      ];
 
-const map: Record<string, any> = {};
+      const map = {};
+      await Promise.all(
+        uniquePatientIds.map(async (pid) => {
+          try {
+            const p = await patientsService.getById(pid);
+            map[pid] = p;
+          } catch {
+            map[pid] = null;
+          }
+        })
+      );
 
-await Promise.all(
-  uniquePatientIds.map(async (pid: string) => {
-    try {
-      const p = await patientsService.getById(pid);
-      map[pid] = p;
-    } catch {
-      map[pid] = null;
-    }
-  })
-);
-
-setPatientsMap(map);
-
+      setPatientsMap(map);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to load department data", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to load department data",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -67,60 +75,122 @@ setPatientsMap(map);
     return true;
   });
 
+  const badgeClass = (status) =>
+    status === "approved"
+      ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+      : status === "report_uploaded"
+      ? "bg-indigo-100 text-indigo-700 border border-indigo-300"
+      : "bg-gray-200 text-gray-700 border border-gray-300";
+
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Department Reports</h1>
-        <div className="flex gap-2">
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="border rounded px-2 py-1">
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="uploaded">Report Uploaded</option>
-          </select>
-          <Button onClick={() => navigate(-1)}>Back</Button>
+      <div className="space-y-6">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">Department Workload</h1>
+            <p className="text-muted-foreground">
+              Review all report activities under this department
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="border rounded-lg px-3 py-2 bg-white/50 backdrop-blur"
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="uploaded">Report Uploaded</option>
+            </select>
+
+            <Button
+              onClick={() => navigate(-1)}
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Back
+            </Button>
+          </div>
+        </div>
+
+        {/* STATS CARD */}
+        <div className="backdrop-blur-lg bg-white/60 border border-white/40 shadow-xl rounded-2xl p-4 flex gap-10">
+          <div>
+            <p className="text-sm text-muted-foreground">Total Reports</p>
+            <p className="text-2xl font-semibold">{reports.length}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Unique Patients</p>
+            <p className="text-2xl font-semibold">
+              {Object.keys(patientsMap).length}
+            </p>
+          </div>
+        </div>
+
+        {/* TABLE */}
+        <div className="backdrop-blur-lg bg-white/60 border border-white/40 shadow-xl rounded-2xl p-4 overflow-auto">
+          <Table>
+            <TableHeader className="bg-white/50 backdrop-blur rounded-xl">
+              <TableRow>
+                <TableHead className="w-40">Case #</TableHead>
+                <TableHead className="w-60">Patient</TableHead>
+                <TableHead className="w-40 text-center">Status</TableHead>
+                <TableHead className="w-40">Assigned</TableHead>
+                <TableHead className="text-right w-24">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {filtered.map((r) => {
+                const pid = r.patient?._id || r.patient;
+                const p = patientsMap[pid];
+
+                return (
+                  <TableRow
+                    key={r._id}
+                    className="hover:bg-white/40 backdrop-blur transition"
+                  >
+                    <TableCell className="py-2 font-semibold">
+                      {r.caseNumber}
+                    </TableCell>
+
+                    <TableCell className="py-2">
+                      {p ? `${p.firstName} ${p.lastName}` : pid}
+                    </TableCell>
+
+                    <TableCell className="py-2 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm border ${badgeClass(
+                          r.status
+                        )}`}
+                      >
+                        {r.status.replace("_", " ")}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="py-2">
+                      {r.assignedTo?.name || r.assignedTo || "-"}
+                    </TableCell>
+
+                    <TableCell className="text-right py-2">
+                      <Button
+                        size="sm"
+                        className="rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => navigate(`/admin/report/${r._id}`)}
+                      >
+                        Open
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       </div>
-
-      {loading ? <div>Loading...</div> : (
-        <>
-          <div className="mb-4">
-            <div className="text-sm text-muted-foreground">Total reports: {reports.length}</div>
-            <div className="text-sm text-muted-foreground">Unique patients: {Object.keys(patientsMap).length}</div>
-          </div>
-
-          <div className="bg-white rounded shadow overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Case #</TableHead>
-                  <TableHead>Patient</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Assigned</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((r) => {
-                  const pid = r.patient?._id || r.patient;
-                  const p = patientsMap[pid];
-                  return (
-                    <TableRow key={r._id}>
-                      <TableCell>{r.caseNumber}</TableCell>
-                      <TableCell>{p ? `${p.firstName} ${p.lastName}` : pid}</TableCell>
-                      <TableCell>{r.status}</TableCell>
-                      <TableCell>{r.assignedTo?.name || r.assignedTo}</TableCell>
-                      <TableCell className="text-right">
-                        <Button size="sm" onClick={() => navigate(`/admin/report/${r._id}`)}>Open</Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </>
-      )}
     </DashboardLayout>
   );
 }

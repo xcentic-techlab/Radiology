@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Power, Search } from 'lucide-react';
+import { Plus, Power, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -54,11 +54,9 @@ const Departments = () => {
     }
   };
 
-  // ⭐ Apply Filters (Name + Status)
   const applyFilters = () => {
     let filtered = [...departments];
 
-    // Name filter
     if (search.trim() !== "") {
       filtered = filtered.filter((d) =>
         d.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -66,7 +64,6 @@ const Departments = () => {
       );
     }
 
-    // Status filter
     if (filterStatus !== "all") {
       filtered = filtered.filter(
         (d) => d.isActive === (filterStatus === "active")
@@ -76,7 +73,6 @@ const Departments = () => {
     setFilteredDepartments(filtered);
   };
 
-  // ⭐ Toggle Active / Inactive
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
       await departmentsService.update(id, { isActive: !currentStatus });
@@ -103,26 +99,30 @@ const Departments = () => {
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Departments</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
             <p className="text-muted-foreground">Manage hospital departments</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
+          >
             Add Department
           </Button>
         </div>
 
-        <Card>
+        {/* GLASS CARD */}
+        <Card className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl">
           <CardHeader>
 
-            {/* 🔍 SEARCH */}
+            {/* SEARCH */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search departments..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 glass-input"
               />
             </div>
 
@@ -131,7 +131,7 @@ const Departments = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="border rounded-md px-3 py-2 w-full"
+                className="border rounded-md px-3 py-2 w-full bg-white/50 backdrop-blur-lg"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -143,7 +143,7 @@ const Departments = () => {
 
           <CardContent>
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-white/50 backdrop-blur-lg rounded-lg">
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
@@ -168,11 +168,16 @@ const Departments = () => {
                   </TableRow>
                 ) : (
                   filteredDepartments.map((dept) => (
-                    <TableRow key={dept._id}>
+                    <TableRow
+                      key={dept._id}
+                      className="hover:bg-white/40 backdrop-blur transition rounded-lg"
+                    >
                       <TableCell className="font-medium">{dept.name}</TableCell>
 
                       <TableCell>
-                        <Badge variant="outline">{dept.code}</Badge>
+                        <Badge className="bg-gray-100 text-gray-700 border border-gray-300">
+                          {dept.code}
+                        </Badge>
                       </TableCell>
 
                       <TableCell className="max-w-xs truncate">
@@ -180,18 +185,25 @@ const Departments = () => {
                       </TableCell>
 
                       <TableCell>
-                        <Badge variant={dept.isActive ? 'default' : 'secondary'}>
-                          {dept.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
+                        {dept.isActive ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-300">
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-700 border border-red-300">
+                            Inactive
+                          </Badge>
+                        )}
                       </TableCell>
 
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 border border-gray-300 hover:bg-gray-100 rounded-md"
                           onClick={() => handleToggleActive(dept._id, dept.isActive)}
                         >
-                          <Power className="h-4 w-4" />
+                          <Power className="h-4 w-4 text-gray-700" />
                         </Button>
                       </TableCell>
 
@@ -199,6 +211,7 @@ const Departments = () => {
                   ))
                 )}
               </TableBody>
+
             </Table>
           </CardContent>
         </Card>

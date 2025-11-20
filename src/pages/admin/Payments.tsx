@@ -55,11 +55,9 @@ const Payments = () => {
     }
   };
 
-  // ⭐ Apply All Filters
   const applyFilters = () => {
     let filtered = [...payments];
 
-    // SEARCH: case number or transaction id
     if (search.trim() !== "") {
       filtered = filtered.filter((p) =>
         p.report.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -67,17 +65,14 @@ const Payments = () => {
       );
     }
 
-    // METHOD FILTER
     if (filterMethod !== "all") {
       filtered = filtered.filter((p) => p.method === filterMethod);
     }
 
-    // STATUS FILTER
     if (filterStatus !== "all") {
       filtered = filtered.filter((p) => p.status === filterStatus);
     }
 
-    // DATE FILTER
     if (filterDate !== "all") {
       const now = new Date();
 
@@ -106,32 +101,36 @@ const Payments = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        
+        {/* PAGE TITLE */}
         <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
           <p className="text-muted-foreground">Track all payment transactions</p>
         </div>
 
-        <Card>
+        {/* GLASS FILTER CARD */}
+        <Card className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl">
           <CardHeader>
-            {/* 🔍 SEARCH */}
+
+            {/* SEARCH */}
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by case number or transaction ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 glass-input"
               />
             </div>
 
-            {/* 🔽 FILTERS */}
+            {/* FILTERS */}
             <div className="grid grid-cols-3 gap-4">
 
               {/* METHOD */}
               <select
                 value={filterMethod}
                 onChange={(e) => setFilterMethod(e.target.value)}
-                className="border rounded-md px-3 py-2"
+                className="border rounded-md px-3 py-2 bg-white/50 backdrop-blur"
               >
                 <option value="all">All Methods</option>
                 <option value="cash">Cash</option>
@@ -144,7 +143,7 @@ const Payments = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="border rounded-md px-3 py-2"
+                className="border rounded-md px-3 py-2 bg-white/50 backdrop-blur"
               >
                 <option value="all">All Status</option>
                 <option value="success">Success</option>
@@ -156,7 +155,7 @@ const Payments = () => {
               <select
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                className="border rounded-md px-3 py-2"
+                className="border rounded-md px-3 py-2 bg-white/50 backdrop-blur"
               >
                 <option value="all">All Dates</option>
                 <option value="today">Today</option>
@@ -165,11 +164,12 @@ const Payments = () => {
               </select>
 
             </div>
+
           </CardHeader>
 
           <CardContent>
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-white/50 backdrop-blur rounded-xl">
                 <TableRow>
                   <TableHead>Case #</TableHead>
                   <TableHead>Amount</TableHead>
@@ -182,21 +182,25 @@ const Payments = () => {
               </TableHeader>
 
               <TableBody>
+
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">
+                    <TableCell colSpan={7} className="text-center py-4">
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : filteredPayments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">
+                    <TableCell colSpan={7} className="text-center py-4">
                       No payments found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredPayments.map((payment) => (
-                    <TableRow key={payment._id}>
+                    <TableRow
+                      key={payment._id}
+                      className="hover:bg-white/40 backdrop-blur transition"
+                    >
                       <TableCell className="font-medium">
                         {payment.report.caseNumber}
                       </TableCell>
@@ -204,7 +208,7 @@ const Payments = () => {
                       <TableCell>₹{payment.amount.toLocaleString()}</TableCell>
 
                       <TableCell>
-                        <Badge variant="outline">
+                        <Badge className="bg-gray-100 text-gray-700 border border-gray-300">
                           {paymentMethodLabels[payment.method]}
                         </Badge>
                       </TableCell>
@@ -222,10 +226,10 @@ const Payments = () => {
                       <TableCell>
                         {format(new Date(payment.createdAt), 'MMM dd, yyyy')}
                       </TableCell>
-
                     </TableRow>
                   ))
                 )}
+
               </TableBody>
             </Table>
           </CardContent>

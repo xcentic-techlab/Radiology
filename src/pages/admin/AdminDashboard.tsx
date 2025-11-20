@@ -80,31 +80,60 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+<DashboardLayout>
+  {/* HEADER */}
+  <div className="mb-8 text-center">
+  <h1 className="text-4xl font-bold tracking-tight">
+    Admin Dashboard
+  </h1>
+  <p className="text-muted-foreground mt-1">
+    Overview of system metrics and performance
+  </p>
+</div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {CARDS.map((c, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02 }}
-            onClick={c.onClick}
-            className="cursor-pointer"
-          >
-            <div className="p-5 border rounded-xl shadow bg-white hover:bg-gray-50 transition">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-gray-500 text-sm">{c.title}</span>
-                  <div className="text-3xl font-bold mt-2">{c.val}</div>
-                </div>
-                <c.icon className="w-10 h-10 text-primary" />
+
+  {/* CARDS GRID */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {CARDS.map((c, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.07 }}
+        whileHover={{ scale: 1.03 }}
+        onClick={c.onClick}
+        className="cursor-pointer"
+      >
+        <div
+          className="
+            p-6 rounded-2xl shadow-lg border 
+            bg-white/60 backdrop-blur-md 
+            hover:bg-white/80 hover:shadow-xl 
+            transition-all duration-200
+          "
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="text-sm text-gray-600">{c.title}</span>
+              <div className="text-4xl font-bold mt-2 text-gray-900">
+                {c.val}
               </div>
             </div>
-          </motion.div>
-        ))}
-      </div>
-    </DashboardLayout>
+
+            <div
+              className="
+                p-3 rounded-xl bg-primary/10 
+                text-primary shadow-sm
+              "
+            >
+              <c.icon className="w-8 h-8" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+</DashboardLayout>
+
   );
 }

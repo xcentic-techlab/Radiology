@@ -185,108 +185,134 @@ useEffect(() => {
     }
   };
 
-  return (
-    <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Create Case</h1>
-        <p className="text-muted-foreground">Open a new case for patient</p>
+return (
+  <DashboardLayout>
+    <div className="max-w-3xl mx-auto space-y-10">
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Case Details</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-              {/* PATIENT SELECT */}
-              <div className="space-y-2">
-                <Label>Patient *</Label>
-                <Select
-                  onValueChange={(v) => setValue("patient", v)}
-                  disabled={loading || isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select patient" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availablePatients.map((p) => (
-  <SelectItem key={p._id} value={p._id}>
-    {p.firstName} {p.lastName} — {p.contact?.phone}
-  </SelectItem>
-))}
-
-                  </SelectContent>
-                </Select>
-              </div>
-
-
-              {/* PATIENT INFO */}
-              {patientInfo && (
-                <Card className="border shadow-md">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Patient Information</CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="grid grid-cols-2 gap-4 text-sm">
-
-                    <Info label="Patient ID" value={patientInfo.patientId} />
-                    <Info label="Name" value={`${patientInfo.firstName} ${patientInfo.lastName}`} />
-
-                    <Info label="Age" value={patientInfo.age} />
-                    <Info label="Gender" value={patientInfo.gender} />
-
-                    <Info label="Phone" value={patientInfo.contact?.phone} />
-                    <Info label="Email" value={patientInfo.contact?.email} />
-
-                    <Info label="Address" value={patientInfo.address} />
-                    <Info label="Referred Doctor" value={patientInfo.referredDoctor} />
-
-                    {/* PAYMENT STATUS */}
-                    <div>
-                      <Label className="text-muted-foreground">Payment Status</Label>
-                      <p
-                        className={`w-fit px-2 py-1 rounded text-white font-semibold
-                        ${patientInfo.paymentStatus === "paid" ? "bg-green-600" : "bg-red-600"}`}
-                      >
-                        {patientInfo.paymentStatus.toUpperCase()}
-                      </p>
-                    </div>
-
-                    <Info label="Case Type" value={patientInfo.caseType} />
-
-                    <Info label="Govt ID Type" value={patientInfo.govtId?.idType} />
-                    <Info label="Govt ID Number" value={patientInfo.govtId?.idNumber} />
-
-                    {/* CASE DESCRIPTION */}
-                    <div className="col-span-2">
-                      <Label>Case Description</Label>
-                      <p>{patientInfo.caseDescription}</p>
-                    </div>
-
-
-
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* BUTTONS */}
-              <div className="flex justify-end gap-4">
-                <Button variant="outline" onClick={() => navigate("/department/cases")}>
-                  Cancel
-                </Button>
-
-                <Button type="submit" disabled={isSubmitting || loading}>
-                  Create Case
-                </Button>
-              </div>
-
-            </form>
-          </CardContent>
-        </Card>
+      {/* PAGE TITLE */}
+      <div className="text-center space-y-1">
+        <h1 className="text-4xl font-bold text-slate-800 tracking-tight">Create Case</h1>
+        <p className="text-muted-foreground text-sm">
+          Open a new case for a patient
+        </p>
       </div>
-    </DashboardLayout>
-  );
+
+      {/* MAIN CARD */}
+      <Card className="bg-white/60 backdrop-blur-md border border-white/40 shadow-xl rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Case Details
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+            {/* PATIENT SELECT */}
+            <div className="space-y-2">
+              <Label className="font-medium">Select Patient *</Label>
+              <Select
+                onValueChange={(v) => setValue("patient", v)}
+                disabled={loading || isSubmitting}
+              >
+                <SelectTrigger className="rounded-xl bg-white/50 backdrop-blur-sm shadow-sm">
+                  <SelectValue placeholder="Choose patient" />
+                </SelectTrigger>
+
+                <SelectContent className="rounded-xl">
+                  {availablePatients.length > 0 ? (
+                    availablePatients.map((p) => (
+                      <SelectItem key={p._id} value={p._id}>
+                        {p.firstName} {p.lastName} — {p.contact?.phone}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground px-4 py-2">
+                      No available patients
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* PATIENT INFORMATION CARD */}
+            {patientInfo && (
+              <Card className="rounded-xl bg-white/70 backdrop-blur-md shadow-md border border-white/40">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">
+                    Patient Information
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+                  <Info label="Patient ID" value={patientInfo.patientId} />
+                  <Info label="Name" value={`${patientInfo.firstName} ${patientInfo.lastName}`} />
+
+                  <Info label="Age" value={patientInfo.age} />
+                  <Info label="Gender" value={patientInfo.gender} />
+
+                  <Info label="Phone" value={patientInfo.contact?.phone} />
+                  <Info label="Email" value={patientInfo.contact?.email} />
+
+                  <Info label="Address" value={patientInfo.address} />
+                  <Info label="Referred Doctor" value={patientInfo.referredDoctor} />
+
+                  {/* PAYMENT STATUS */}
+                  <div>
+                    <Label className="text-muted-foreground">Payment Status</Label>
+                    <p
+                      className={`w-fit mt-1 px-2 py-1 rounded text-white text-xs font-semibold
+                      ${patientInfo.paymentStatus === "paid" ? "bg-green-600" : "bg-red-600"}`}
+                    >
+                      {patientInfo.paymentStatus.toUpperCase()}
+                    </p>
+                  </div>
+
+                  <Info label="Case Type" value={patientInfo.caseType} />
+                  <Info label="Govt ID Type" value={patientInfo.govtId?.idType} />
+                  <Info label="Govt ID Number" value={patientInfo.govtId?.idNumber} />
+
+                  {/* CASE DESCRIPTION */}
+                  <div className="col-span-2">
+                    <Label className="text-muted-foreground">Case Description</Label>
+                    <p className="mt-1 bg-white/40 p-2 rounded-xl backdrop-blur-sm shadow-sm text-sm">
+                      {patientInfo.caseDescription || "—"}
+                    </p>
+                  </div>
+
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => navigate("/department/cases")}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting || loading}
+                className="rounded-xl bg-blue-600 shadow-lg hover:bg-blue-700"
+              >
+                Create Case
+              </Button>
+            </div>
+
+          </form>
+        </CardContent>
+      </Card>
+
+    </div>
+  </DashboardLayout>
+);
+
 };
 
 export default CreateCase;

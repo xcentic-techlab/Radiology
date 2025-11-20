@@ -334,318 +334,283 @@ fetchPatients();
 
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Patients</h1>
-            <p className="text-muted-foreground">Manage patient records</p>
-          </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Patient
-          </Button>
+  <DashboardLayout>
+    <div className="space-y-6">
+
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Patients</h1>
+          <p className="text-muted-foreground">Manage and track patient records</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            {/* <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search patients..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div> */}
-
-            <div className="grid grid-cols-6 gap-2 mb-3">
-
-              <div className="mb-3 flex gap-3">
-  <Input
-    placeholder="Search by Patient ID..."
-    value={searchById}
-    onChange={(e) => setSearchById(e.target.value)}
-    className="w-64 border-blue-500"
-  />
-</div>
+<Button
+  onClick={() => setDialogOpen(true)}
+  className="px-6 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-700 
+             backdrop-blur-md shadow-lg shadow-blue-500/20 
+             text-white font-semibold transition-all"
+>
+  Add Patient
+</Button>
 
 
-  {/* NAME FILTER */}
-  <Input
-    placeholder="Search Name..."
-    onChange={(e) =>
-      setFilters((f) => ({ ...f, name: e.target.value }))
-    }
-  />
+      </div>
 
-  {/* CASE TYPE */}
-  <select
-    className="border rounded px-2"
-    onChange={(e) =>
-      setFilters((f) => ({ ...f, caseType: e.target.value }))
-    }
-  >
-    <option value="">Case Type</option>
-    <option value="Urgent">Urgent</option>
-    <option value="Routine">Routine</option>
-    <option value="Emergency">Emergency</option>
-  </select>
+      {/* FILTERS CARD (Glass + Responsive Grid) */}
+      <Card className="backdrop-blur-md bg-white/60 shadow-xl border rounded-2xl">
+        <CardHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
 
-  {/* PAYMENT */}
-  <select
-    className="border rounded px-2"
-    onChange={(e) =>
-      setFilters((f) => ({ ...f, payment: e.target.value }))
-    }
-  >
-    <option value="">Payment</option>
-    <option value="paid">Paid</option>
-    <option value="pending">Pending</option>
-  </select>
+            {/* Patient ID Search */}
+            <Input
+              placeholder="Search by Patient ID..."
+              value={searchById}
+              onChange={(e) => setSearchById(e.target.value)}
+              className="shadow-sm focus:ring-2 focus:ring-blue-300 rounded-xl"
+            />
 
-  {/* DEPARTMENT */}
-  <select
-    className="border rounded px-2"
-    onChange={(e) =>
-      setFilters((f) => ({ ...f, department: e.target.value }))
-    }
-  >
-    <option value="">Department</option>
-    <option value="mri">MRI</option>
-    <option value="ct scan">CT Scan</option>
-    <option value="x-ray">X-Ray</option>
-    <option value="ultrasound">UltraSound</option>
-  </select>
+            {/* Name */}
+            <Input
+              placeholder="Search Name..."
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, name: e.target.value }))
+              }
+              className="rounded-xl shadow-sm"
+            />
 
-  {/* DATE FILTER */}
-  <select
-    className="border rounded px-2"
-    onChange={(e) =>
-      setFilters((f) => ({ ...f, date: e.target.value }))
-    }
-  >
-    <option value="all">All</option>
-    <option value="24h">Last 24 Hours</option>
-    <option value="yesterday">Yesterday</option>
-    <option value="week">Last 7 Days</option>
-    <option value="month">Last 30 Days</option>
-    <option value="custom">Custom</option>
-  </select>
-
-  {/* CUSTOM DATE PICKER */}
-  {filters.date === "custom" && (
-    <>
-      <input type="date"
-        onChange={(e) =>
-          setFilters((f) => ({ ...f, customFrom: e.target.value }))
-        }
-      />
-      <input type="date"
-        onChange={(e) =>
-          setFilters((f) => ({ ...f, customTo: e.target.value }))
-        }
-      />
-    </>
-  )}
-</div>
-
-          </CardHeader>
-          <CardContent>
-<Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead>Patient ID</TableHead>
-      <TableHead>Name</TableHead>
-      <TableHead>Phone</TableHead>
-      <TableHead>Case Type</TableHead>
-      <TableHead>Payment</TableHead>
-      <TableHead>Status</TableHead>
-      <TableHead>Department</TableHead>
-      <TableHead>Govt ID</TableHead>
-    </TableRow>
-  </TableHeader>
-
-  <TableBody>
-    {filteredPatients.map((patient) => (
-      <TableRow
-        key={patient._id}
-        className="cursor-pointer hover:bg-muted/50"
-        onClick={() => setSelectedPatient(patient)}
-
-      >
-
-        <TableCell>
-  {patient.patientId ? (
-    <span className="font-mono text-blue-700">{patient.patientId}</span>
-  ) : (
-    "-"
-  )}
-</TableCell>
-
-        {/* NAME */}
-        <TableCell className="font-semibold">
-          {patient.firstName} {patient.lastName}
-        </TableCell>
-
-        {/* PHONE */}
-        <TableCell>{patient.contact?.phone}</TableCell>
-
-        {/* CASE TYPE */}
-        <TableCell className="font-medium text-blue-600">
-          {patient.caseType}
-        </TableCell>
-
-        {/* PAYMENT */}
-        <TableCell>
-          {patient.paymentStatus === "paid" ? (
-            <span className="text-green-600 font-semibold">Paid</span>
-          ) : (
-            <Button
-              size="sm"
-              className="bg-yellow-500 hover:bg-yellow-600"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMarkPaid(patient);
-              }}
+            {/* Case Type */}
+            <select
+              className="border rounded-xl px-3 py-2 bg-white/70 shadow-sm"
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, caseType: e.target.value }))
+              }
             >
-              Mark Paid
-            </Button>
-          )}
-        </TableCell>
+              <option value="">Case Type</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Routine">Routine</option>
+              <option value="Emergency">Emergency</option>
+            </select>
 
-        {/* STATUS */}
-        <TableCell>
-          <span className="capitalize font-semibold">
-            {patient.status?.replace("_", " ")}
-          </span>
-        </TableCell>
+            {/* Payment */}
+            <select
+              className="border rounded-xl px-3 py-2 bg-white/70 shadow-sm"
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, payment: e.target.value }))
+              }
+            >
+              <option value="">Payment</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+            </select>
 
-        {/* DEPARTMENT */}
-<TableCell>
-  {/* If not paid → disable assign dept */}
-  {patient.paymentStatus !== "paid" ? (
-    <span className="text-yellow-700 font-semibold">
-      Payment Pending
-    </span>
-  ) : !patient.departmentAssignedTo ? (
-    <Button
-      size="sm"
-      className="bg-blue-600 hover:bg-blue-700 text-white"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleAssignDepartment(patient);
-      }}
-    >
-      Assign Dept
-    </Button>
-  ) : (
-    <span className="text-primary font-semibold">
-      {patient.assignedDepartment}
-    </span>
-  )}
-</TableCell>
+            {/* Department */}
+            <select
+              className="border rounded-xl px-3 py-2 bg-white/70 shadow-sm"
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, department: e.target.value }))
+              }
+            >
+              <option value="">Department</option>
+              <option value="mri">MRI</option>
+              <option value="ct scan">CT Scan</option>
+              <option value="x-ray">X-Ray</option>
+              <option value="ultrasound">UltraSound</option>
+            </select>
 
+            {/* Date Filter */}
+            <select
+              className="border rounded-xl px-3 py-2 bg-white/70 shadow-sm"
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, date: e.target.value }))
+              }
+            >
+              <option value="all">All</option>
+              <option value="24h">Last 24 Hours</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="week">Last 7 Days</option>
+              <option value="month">Last 30 Days</option>
+              <option value="custom">Custom</option>
+            </select>
 
+            {/* Custom Dates */}
+            {filters.date === "custom" && (
+              <div className="col-span-full flex gap-3">
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, customFrom: e.target.value }))
+                  }
+                  className="border rounded-xl px-3 py-2 shadow-sm"
+                />
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, customTo: e.target.value }))
+                  }
+                  className="border rounded-xl px-3 py-2 shadow-sm"
+                />
+              </div>
+            )}
 
+          </div>
+        </CardHeader>
 
+        {/* TABLE */}
+        <CardContent>
+          <div className="overflow-x-auto rounded-xl border shadow-md bg-white/70 backdrop-blur">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-blue-50 to-purple-50">
+                  <TableHead>Patient ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Case Type</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Govt ID</TableHead>
+                </TableRow>
+              </TableHeader>
 
-        <TableCell>
-  {patient.govtId?.fileUrl ? (
-    <div className="flex items-center gap-2">
-      <img
-        src={patient.govtId.fileUrl}
-        alt="Govt ID"
-        className="h-10 w-16 rounded border cursor-pointer hover:scale-110 transition"
-        onClick={(e) => {
-          e.stopPropagation();
-          window.open(patient.govtId.fileUrl, "_blank");
-        }}
-      />
+              <TableBody>
+                {filteredPatients.map((patient) => (
+                  <TableRow
+                    key={patient._id}
+                    className="cursor-pointer hover:bg-blue-50 transition border-b"
+                    onClick={() => setSelectedPatient(patient)}
+                  >
+                    <TableCell className="font-mono text-blue-700">{patient.patientId || "-"}</TableCell>
+                    <TableCell className="font-semibold">{patient.firstName} {patient.lastName}</TableCell>
+                    <TableCell>{patient.contact?.phone}</TableCell>
+                    <TableCell className="font-medium text-blue-600">{patient.caseType}</TableCell>
 
-      <span className="text-sm font-semibold">
-        {patient.govtId.idType}
-      </span>
+                    {/* Payment */}
+                    <TableCell>
+                      {patient.paymentStatus === "paid" ? (
+                        <span className="text-green-600 font-semibold">Paid</span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkPaid(patient);
+                          }}
+                        >
+                          Mark Paid
+                        </Button>
+                      )}
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell className="font-semibold capitalize">
+                      {patient.status?.replace("_", " ")}
+                    </TableCell>
+
+                    {/* Department */}
+                    <TableCell>
+                      {patient.paymentStatus !== "paid" ? (
+                        <span className="text-yellow-700 font-semibold">Payment Pending</span>
+                      ) : !patient.departmentAssignedTo ? (
+                        <Button
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAssignDepartment(patient);
+                          }}
+                        >
+                          Assign Dept
+                        </Button>
+                      ) : (
+                        <span className="text-blue-700 font-semibold">
+                          {patient.assignedDepartment}
+                        </span>
+                      )}
+                    </TableCell>
+
+                    {/* Govt ID */}
+                    <TableCell>
+                      {patient.govtId?.fileUrl ? (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={patient.govtId.fileUrl}
+                            alt="Govt ID"
+                            className="h-10 w-16 rounded border shadow cursor-pointer hover:scale-110 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(patient.govtId.fileUrl, "_blank");
+                            }}
+                          />
+                          <span className="text-sm font-semibold">{patient.govtId.idType}</span>
+                        </div>
+                      ) : "-"}
+                    </TableCell>
+
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  ) : (
-    "-"
-  )}
-</TableCell>
 
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
+    {/* PATIENT DETAILS MODAL */}
+    {selectedPatient && (
+      <Dialog
+        open={true}
+        onOpenChange={(open) => !open && setSelectedPatient(null)}
+      >
+        <DialogContent className="max-w-xl rounded-2xl shadow-2xl bg-white/80 backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Patient Details — {selectedPatient.firstName} {selectedPatient.lastName}
+            </DialogTitle>
+          </DialogHeader>
 
+          <div className="space-y-2 text-sm">
+            <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
+            <p><b>Age / Gender:</b> {selectedPatient.age} / {selectedPatient.gender}</p>
+            <p><b>Phone:</b> {selectedPatient.contact.phone}</p>
+            <p><b>Email:</b> {selectedPatient.contact.email || "-"}</p>
+            <p><b>Address:</b> {selectedPatient.address}</p>
+            <hr />
+            <p><b>Case Type:</b> {selectedPatient.caseType}</p>
+            <p><b>Description:</b> {selectedPatient.caseDescription}</p>
+            <p><b>Referred Doctor:</b> {selectedPatient.referredDoctor}</p>
+            <hr />
+            <p><b>Payment Status:</b> {selectedPatient.paymentStatus}</p>
+            <p><b>Report Status:</b> {selectedPatient.status}</p>
+            <p><b>Assigned Dept:</b> {selectedPatient.assignedDepartment || "-"}</p>
+            <hr />
+            <p><b>Clinical History:</b> {selectedPatient.clinicalHistory || "-"}</p>
+            <p><b>Previous Injury:</b> {selectedPatient.previousInjury || "-"}</p>
+            <p><b>Previous Surgery:</b> {selectedPatient.previousSurgery || "-"}</p>
+            <hr />
+            <p><b>Govt ID:</b> {selectedPatient.govtId?.idType}</p>
+            <p><b>ID Number:</b> {selectedPatient.govtId?.idNumber}</p>
+          </div>
 
-{selectedPatient && (
-  <Dialog open={true} onOpenChange={(open) => {
-  if (!open) setSelectedPatient(null);
-}}>
-    <DialogContent className="max-w-xl max-h-[90vh] overflow-auto">
-      <DialogHeader>
-        <DialogTitle>
-          🧾 Patient Details — {selectedPatient.firstName} {selectedPatient.lastName}
-        </DialogTitle>
-      </DialogHeader>
+          <Button className="mt-4" onClick={() => setSelectedPatient(null)}>
+            Close
+          </Button>
+        </DialogContent>
+      </Dialog>
+    )}
 
-      <div className="space-y-2 text-sm">
-        <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
-        <p><b>Age / Gender:</b> {selectedPatient.age} / {selectedPatient.gender}</p>
-        <p><b>Phone:</b> {selectedPatient.contact.phone}</p>
-        <p><b>Email:</b> {selectedPatient.contact.email || "-"}</p>
-        <p><b>Address:</b> {selectedPatient.address}</p>
+    {/* CREATE PATIENT DIALOG */}
+    <CreatePatientDialog
+      open={dialogOpen}
+      onClose={() => setDialogOpen(false)}
+      onSuccess={() => {
+        setDialogOpen(false);
+        fetchPatients();
+      }}
+    />
+  </DashboardLayout>
+);
 
-        <hr />
-
-        <p><b>Case Type:</b> {selectedPatient.caseType}</p>
-        <p><b>Description:</b> {selectedPatient.caseDescription}</p>
-        <p><b>Referred Doctor:</b> {selectedPatient.referredDoctor}</p>
-
-        <hr />
-
-        <p><b>Payment Status:</b> {selectedPatient.paymentStatus}</p>
-        <p><b>Report Status:</b> {selectedPatient.status}</p>
-        <p><b>Assigned Dept:</b> {selectedPatient.assignedDepartment || "-"}</p>
-
-        <hr />
-
-
-        <hr />
-
-        <p><b>Clinical History:</b> {selectedPatient.clinicalHistory || "-"}</p>
-        <p><b>Previous Injury:</b> {selectedPatient.previousInjury || "-"}</p>
-        <p><b>Previous Surgery:</b> {selectedPatient.previousSurgery || "-"}</p>
-
-        <hr />
-
-        <p><b>Govt ID:</b> {selectedPatient.govtId?.idType}</p>
-        <p><b>ID Number:</b> {selectedPatient.govtId?.idNumber}</p>
-      </div>
-
-      <Button className="mt-4" onClick={() => setSelectedPatient(null)}>
-        Close
-      </Button>
-    </DialogContent>
-  </Dialog>
-)}
-
-
-
-          </CardContent>
-        </Card>
-      </div>
-
-      <CreatePatientDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSuccess={() => {
-          setDialogOpen(false);
-          fetchPatients();
-        }}
-      />
-    </DashboardLayout>
-  );
 };
 
 export default Patients;
