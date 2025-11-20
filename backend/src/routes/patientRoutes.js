@@ -7,6 +7,7 @@ import {
 import auth from "../middlewares/authMiddleware.js";
 import { permit } from "../middlewares/roleMiddleware.js";
 import Patient from "../models/Patient.js";
+import { uploadGovtId } from "../middlewares/cloudUpload.js";
 
 const router = express.Router();
 
@@ -123,6 +124,35 @@ router.patch("/:id/update-history", auth, async (req, res) => {
     res.status(500).json({ message: "Update failed" });
   }
 });
+
+
+
+
+
+router.post(
+  "/:id/upload-govt-id",
+  auth,
+  uploadGovtId.single("file"),
+  async (req, res) => {
+    try {
+      const patient = await Patient.findById(req.params.id);
+      if (!patient) return res.status(404).json({ message: "Not found" });
+
+      patient.govtId.fileUrl = req.file.path;
+      await patient.save();
+
+      res.json({
+        message: "Govt ID updated",
+        fileUrl: req.file.path,
+        patient,
+      });
+    } catch (err) {
+      console.log("Govt ID Upload Error", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
 
 
 export default router;

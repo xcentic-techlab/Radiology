@@ -75,6 +75,18 @@ updateHistory: async (patientId: string, data: any) => {
   return res.data;
 },
 
+uploadGovtId: async (id: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+
+  const res = await api.post(`/api/patients/${id}/upload-govt-id`, form, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+  
+  return res.data;
+},
+
+
 };
 
 

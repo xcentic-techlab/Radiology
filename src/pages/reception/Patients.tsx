@@ -37,6 +37,8 @@ const Patients = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [params] = useSearchParams();
   const [departments, setDepartments] = useState([]);
+  const [searchById, setSearchById] = useState("");
+
   
 
 
@@ -51,15 +53,102 @@ const [filters, setFilters] = useState({
   customTo: "",
 });
 
-  useEffect(() => {
-    const filtered = patients.filter(
-      (patient) =>
-        patient.firstName.toLowerCase().includes(search.toLowerCase()) ||
-        patient.lastName.toLowerCase().includes(search.toLowerCase()) ||
-        patient.contact.phone.includes(search)
+useEffect(() => {
+  let data = [...patients];
+
+  // -------------------------------
+  // 1) SEARCH BY PATIENT ID
+  // -------------------------------
+  if (searchById.trim() !== "") {
+    data = data.filter((p) =>
+      p.patientId?.toLowerCase().includes(searchById.toLowerCase())
     );
-    setFilteredPatients(filtered);
-  }, [search, patients]);
+  }
+
+  // -------------------------------
+  // 2) NORMAL SEARCH (name/phone)
+  // -------------------------------
+  if (search.trim() !== "") {
+    data = data.filter(
+      (p) =>
+        p.firstName.toLowerCase().includes(search.toLowerCase()) ||
+        p.lastName.toLowerCase().includes(search.toLowerCase()) ||
+        p.contact.phone.includes(search)
+    );
+  }
+
+  // -------------------------------
+  // 3) NAME FILTER
+  // -------------------------------
+  if (filters.name) {
+    data = data.filter((p) =>
+      (p.firstName + p.lastName)
+        .toLowerCase()
+        .includes(filters.name.toLowerCase())
+    );
+  }
+
+  // -------------------------------
+  // 4) CASE TYPE FILTER
+  // -------------------------------
+  if (filters.caseType) {
+    data = data.filter((p) => p.caseType === filters.caseType);
+  }
+
+  // -------------------------------
+  // 5) PAYMENT FILTER
+  // -------------------------------
+  if (filters.payment) {
+    data = data.filter((p) => p.paymentStatus === filters.payment);
+  }
+
+  // -------------------------------
+  // 6) DEPARTMENT FILTER
+  // -------------------------------
+  if (filters.department) {
+    data = data.filter((p) => p.assignedDepartment === filters.department);
+  }
+
+  // -------------------------------
+  // 7) DATE FILTER
+  // -------------------------------
+  if (filters.date !== "all") {
+    const now = new Date();
+
+    data = data.filter((p) => {
+      const created = new Date(p.createdAt);
+
+      if (filters.date === "24h")
+        return now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+
+      if (filters.date === "yesterday") {
+        const diff = now.getDate() - created.getDate();
+        return diff === 1;
+      }
+
+      if (filters.date === "week")
+        return now.getTime() - created.getTime() <= 7 * 24 * 60 * 60 * 1000;
+
+      if (filters.date === "month")
+        return now.getTime() - created.getTime() <= 30 * 24 * 60 * 60 * 1000;
+
+      if (filters.date === "custom") {
+        if (!filters.customFrom || !filters.customTo) return true;
+
+        return (
+          created >= new Date(filters.customFrom) &&
+          created <= new Date(filters.customTo)
+        );
+      }
+
+      return true;
+    });
+  }
+
+  setFilteredPatients(data);
+}, [patients, searchById, search, filters]);
+
+
 
 
   useEffect(() => {
@@ -101,8 +190,25 @@ const fetchDepartments = async () => {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
   let data = [...patients];
+
+  // SEARCH BY ID
+  if (searchById.trim() !== "") {
+    data = data.filter((p) =>
+      p.patientId?.toLowerCase().includes(searchById.toLowerCase())
+    );
+  }
+
+  // NORMAL SEARCH
+  if (search.trim() !== "") {
+    data = data.filter(
+      (p) =>
+        p.firstName.toLowerCase().includes(search.toLowerCase()) ||
+        p.lastName.toLowerCase().includes(search.toLowerCase()) ||
+        p.contact.phone.includes(search)
+    );
+  }
 
   // NAME FILTER
   if (filters.name) {
@@ -111,7 +217,7 @@ const fetchDepartments = async () => {
     );
   }
 
-  // CASE
+  // CASE TYPE
   if (filters.caseType) {
     data = data.filter((p) => p.caseType === filters.caseType);
   }
@@ -126,7 +232,7 @@ const fetchDepartments = async () => {
     data = data.filter((p) => p.assignedDepartment === filters.department);
   }
 
-  // DATE FILTER
+  // DATE
   if (filters.date !== "all") {
     const now = new Date();
 
@@ -136,10 +242,8 @@ const fetchDepartments = async () => {
       if (filters.date === "24h")
         return now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
 
-      if (filters.date === "yesterday") {
-        const diff = now.getDate() - created.getDate();
-        return diff === 1;
-      }
+      if (filters.date === "yesterday")
+        return now.getDate() - created.getDate() === 1;
 
       if (filters.date === "week")
         return now.getTime() - created.getTime() <= 7 * 24 * 60 * 60 * 1000;
@@ -147,18 +251,22 @@ const fetchDepartments = async () => {
       if (filters.date === "month")
         return now.getTime() - created.getTime() <= 30 * 24 * 60 * 60 * 1000;
 
-      if (filters.date === "custom")
+      if (filters.date === "custom") {
+        if (!filters.customFrom || !filters.customTo) return true;
+
         return (
           created >= new Date(filters.customFrom) &&
           created <= new Date(filters.customTo)
         );
+      }
 
       return true;
     });
   }
 
   setFilteredPatients(data);
-}, [filters, patients]);
+}, [patients, searchById, search, filters]);
+
 
 
 
@@ -168,7 +276,7 @@ const handleMarkPaid = async (patient: Patient) => {
     // amount: 500, // 💰 test amount
     onSuccess: async () => {
       await patientsService.updatePayment(patient._id);
-      toast({ title: "Payment Successful ✔" });
+      toast({ title: "Payment Successful" });
       fetchPatients();
     },
   });
@@ -194,16 +302,23 @@ console.log(patient);
     }
 
     await patientsService.assignDepartment(patient._id, {
-      departmentId: dept._id,
-      departmentName: dept.name,
-    });
+  departmentId: dept._id,
+  departmentName: dept.name,
+});
 
-    toast({
-      title: "Assigned!",
-      description: `Patient assigned to ${dept.name}`,
-    });
+// force update inside list without waiting
+patient.status = "sent_to_department";
+patient.departmentAssignedTo = dept._id;
+patient.assignedDepartment = dept.name;
 
-    fetchPatients();
+toast({
+  title: "Assigned!",
+  description: `Patient assigned to ${dept.name} and status updated`,
+});
+
+// reload entire list to ensure UI updates
+fetchPatients();
+
   } catch (error) {
     toast({
       title: "Error",
@@ -245,6 +360,16 @@ console.log(patient);
             </div> */}
 
             <div className="grid grid-cols-6 gap-2 mb-3">
+
+              <div className="mb-3 flex gap-3">
+  <Input
+    placeholder="Search by Patient ID..."
+    value={searchById}
+    onChange={(e) => setSearchById(e.target.value)}
+    className="w-64 border-blue-500"
+  />
+</div>
+
 
   {/* NAME FILTER */}
   <Input
@@ -330,6 +455,7 @@ console.log(patient);
 <Table>
   <TableHeader>
     <TableRow>
+      <TableHead>Patient ID</TableHead>
       <TableHead>Name</TableHead>
       <TableHead>Phone</TableHead>
       <TableHead>Case Type</TableHead>
@@ -346,7 +472,17 @@ console.log(patient);
         key={patient._id}
         className="cursor-pointer hover:bg-muted/50"
         onClick={() => setSelectedPatient(patient)}
+
       >
+
+        <TableCell>
+  {patient.patientId ? (
+    <span className="font-mono text-blue-700">{patient.patientId}</span>
+  ) : (
+    "-"
+  )}
+</TableCell>
+
         {/* NAME */}
         <TableCell className="font-semibold">
           {patient.firstName} {patient.lastName}
@@ -363,7 +499,7 @@ console.log(patient);
         {/* PAYMENT */}
         <TableCell>
           {patient.paymentStatus === "paid" ? (
-            <span className="text-green-600 font-semibold">Paid ✔</span>
+            <span className="text-green-600 font-semibold">Paid</span>
           ) : (
             <Button
               size="sm"
@@ -373,7 +509,7 @@ console.log(patient);
                 handleMarkPaid(patient);
               }}
             >
-              Mark Paid 💳
+              Mark Paid
             </Button>
           )}
         </TableCell>
@@ -387,7 +523,12 @@ console.log(patient);
 
         {/* DEPARTMENT */}
 <TableCell>
-  {!patient.departmentAssignedTo ? (
+  {/* If not paid → disable assign dept */}
+  {patient.paymentStatus !== "paid" ? (
+    <span className="text-yellow-700 font-semibold">
+      Payment Pending
+    </span>
+  ) : !patient.departmentAssignedTo ? (
     <Button
       size="sm"
       className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -404,6 +545,7 @@ console.log(patient);
     </span>
   )}
 </TableCell>
+
 
 
 

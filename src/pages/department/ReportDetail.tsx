@@ -43,10 +43,41 @@ const [indication, setIndication] = useState("");
 const [technique, setTechnique] = useState("");
 const [conclusion, setConclusion] = useState("");
 const [notes, setNotes] = useState("");
+const [govIdFile, setGovIdFile] = useState<File | null>(null);
+const [govUploading, setGovUploading] = useState(false);
+
 
 
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+
+  const uploadGovId = async () => {
+  if (!govIdFile) return;
+
+  try {
+    setGovUploading(true);
+
+    await patientsService.uploadGovtId(report.patient._id, govIdFile);
+
+    toast({
+      title: "Uploaded",
+      description: "Govt ID updated successfully",
+    });
+
+    setGovIdFile(null);
+    loadReport(); // refresh UI
+  } catch (err) {
+    toast({
+      title: "Error",
+      description: "Govt ID upload failed",
+      variant: "destructive",
+    });
+  } finally {
+    setGovUploading(false);
+  }
+};
+
 
   // ###########################
   // LOAD REPORT
@@ -385,6 +416,65 @@ const saveProcedureDetails = async () => {
                   <Label>Referred Doctor</Label>
                   <p>{patientForm.referredDoctor}</p>
                 </div>
+                <div className="col-span-3 border p-3 rounded-lg">
+  <Label>Government ID</Label>
+
+  {report.patient.govtId?.fileUrl ? (
+    <div className="flex items-start justify-between mt-2">
+      <div className="flex gap-3 items-center">
+        <img
+          src={report.patient.govtId.fileUrl}
+          className="h-20 w-32 rounded border cursor-pointer"
+          onClick={() =>
+            window.open(report.patient.govtId.fileUrl, "_blank")
+          }
+        />
+
+        <div>
+          <p className="text-sm">
+            {report.patient.govtId.idType} — {report.patient.govtId.idNumber}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <Input
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
+        />
+
+        <Button
+          className="mt-2"
+          size="sm"
+          disabled={!govIdFile || govUploading}
+          onClick={uploadGovId}
+        >
+          {govUploading ? "Uploading..." : "Replace Govt ID"}
+        </Button>
+      </div>
+    </div>
+  ) : (
+    <>
+      <div className="flex gap-3 mt-2">
+        <Input
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
+        />
+
+        <Button
+          size="sm"
+          disabled={!govIdFile || govUploading}
+          onClick={uploadGovId}
+        >
+          {govUploading ? "Uploading..." : "Upload Govt ID"}
+        </Button>
+      </div>
+    </>
+  )}
+</div>
+
               </>
             ) : (
               <>
