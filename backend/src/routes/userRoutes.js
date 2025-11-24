@@ -10,6 +10,7 @@ import {
 
 import auth from "../middlewares/authMiddleware.js";
 import { permit } from "../middlewares/roleMiddleware.js";
+import { deleteUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -19,6 +20,14 @@ const router = express.Router();
  *  - Update users
  *  - Activate / deactivate users
  */
+
+router.delete(
+  "/:id",
+  auth,
+  permit("admin", "super_admin"),
+  deleteUser
+);
+
 router.post("/", auth, createUser);
 router.get("/", auth, getAllUsers);
 router.get("/:id", auth, getUserById);

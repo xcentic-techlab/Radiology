@@ -138,6 +138,11 @@ router.post(
       const patient = await Patient.findById(req.params.id);
       if (!patient) return res.status(404).json({ message: "Not found" });
 
+      // 🚀 FIX — create govtId object if missing
+      if (!patient.govtId) {
+        patient.govtId = {};
+      }
+
       patient.govtId.fileUrl = req.file.path;
       await patient.save();
 
@@ -152,6 +157,24 @@ router.post(
     }
   }
 );
+
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const deleted = await Patient.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    res.json({ message: "Patient deleted successfully" });
+
+  } catch (err) {
+    console.error("Delete Patient Error:", err);
+    res.status(500).json({ message: "Server error deleting patient" });
+  }
+});
+
 
 
 

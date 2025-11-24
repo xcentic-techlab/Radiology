@@ -24,11 +24,15 @@ export const getCasesByDepartment = async (req, res) => {
   try {
     const cases = await Case.find({ department: req.params.deptId })
       .populate("patientId")
-      .populate("assignedTo");
+      .populate("assignedTo")
+      .populate("reportId");  // 🔥 FIX: include the report!
 
+    // Format response
     const formatted = cases.map(c => ({
       ...c._doc,
       patient: c.patientId,
+      reportId: c.reportId?._id || null,   // 🔥 return ID clearly
+      report: c.reportId || null          // (optional) full report
     }));
 
     res.json(formatted);
@@ -38,17 +42,24 @@ export const getCasesByDepartment = async (req, res) => {
 };
 
 
+
 export const getCaseById = async (req, res) => {
   try {
     const caseData = await Case.findById(req.params.id)
-      .populate({ path: "patientId", select: "-__v", model: "Patient", as: "patient" })
-      .populate("assignedTo");
+      .populate("patientId")
+      .populate("assignedTo")
+      .populate("reportId");   // 🔥 FIX
+
+    if (!caseData) {
+      return res.status(404).json({ message: "Case not found" });
+    }
 
     res.json(caseData);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const updateCase = async (req, res) => {
   try {

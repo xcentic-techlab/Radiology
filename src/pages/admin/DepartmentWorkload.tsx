@@ -117,7 +117,7 @@ export default function DepartmentWorkload() {
         </div>
 
         {/* STATS CARD */}
-        <div className="backdrop-blur-lg bg-white/60 border border-white/40 shadow-xl rounded-2xl p-4 flex gap-10">
+        {/* <div className="backdrop-blur-lg bg-white/60 border border-white/40 shadow-xl rounded-2xl p-4 flex gap-10">
           <div>
             <p className="text-sm text-muted-foreground">Total Reports</p>
             <p className="text-2xl font-semibold">{reports.length}</p>
@@ -128,7 +128,7 @@ export default function DepartmentWorkload() {
               {Object.keys(patientsMap).length}
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* TABLE */}
         <div className="backdrop-blur-lg bg-white/60 border border-white/40 shadow-xl rounded-2xl p-4 overflow-auto">

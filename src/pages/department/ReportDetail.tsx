@@ -593,65 +593,6 @@ const saveProcedureDetails = async () => {
         </Card>
 
 
-        {/* Clinical history (patient model) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Clinical History</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Clinical history</Label>
-              <Textarea rows={3} value={clinicalHistory} onChange={(e) => setClinicalHistory(e.target.value)} />
-            </div>
-            <div>
-              <Label>Previous injury</Label>
-              <Textarea rows={2} value={previousInjury} onChange={(e) => setPreviousInjury(e.target.value)} />
-            </div>
-            <div>
-              <Label>Previous surgery</Label>
-              <Textarea rows={2} value={previousSurgery} onChange={(e) => setPreviousSurgery(e.target.value)} />
-            </div>
-            <div className="flex gap-3">
-              <Button onClick={saveClinicalHistory} disabled={saving}>Save History</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* File upload / view */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Report File</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!report.reportFile ? (
-              <div className="space-y-3">
-                <Label>Upload final PDF</Label>
-                <div className="flex gap-2 items-center">
-                  <Input type="file" accept="application/pdf,image/*" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} disabled={uploading} />
-                  <Button onClick={uploadFile} disabled={!selectedFile || uploading}>
-                    <Upload className="mr-2 h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload'}
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">After uploading, the report status can be moved to <b>report_uploaded</b>.</p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-medium">{report.reportFile?.filename || 'Report.pdf'}</p>
-                    <a href={report.reportFile?.url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">View / Download</a>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => { navigator.clipboard?.writeText(report.reportFile?.url || ''); toast({ title: 'Copied', description: 'File URL copied' }); }}>Copy URL</Button>
-                  <Button size="sm" variant="outline" onClick={() => { setSelectedFile(null); setReport({ ...report, reportFile: null }); }}>Replace</Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
 <Card>
   <CardHeader>
     <CardTitle>Procedure Details</CardTitle>
@@ -709,7 +650,31 @@ const saveProcedureDetails = async () => {
   </CardContent>
 </Card>
 
+        {/* Clinical history (patient model) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Clinical History</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Clinical history</Label>
+              <Textarea rows={3} value={clinicalHistory} onChange={(e) => setClinicalHistory(e.target.value)} />
+            </div>
+            <div>
+              <Label>Previous injury</Label>
+              <Textarea rows={2} value={previousInjury} onChange={(e) => setPreviousInjury(e.target.value)} />
+            </div>
+            <div>
+              <Label>Previous surgery</Label>
+              <Textarea rows={2} value={previousSurgery} onChange={(e) => setPreviousSurgery(e.target.value)} />
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={saveClinicalHistory} disabled={saving}>Save Clinical History</Button>
+            </div>
+          </CardContent>
+        </Card>
 
+        
         {/* Findings & Impression */}
         <Card>
           <CardHeader>
@@ -729,6 +694,44 @@ const saveProcedureDetails = async () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* File upload / view */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Report File</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!report.reportFile ? (
+              <div className="space-y-3">
+                <Label>Upload final PDF</Label>
+                <div className="flex gap-2 items-center">
+                  <Input type="file" accept="application/pdf,image/*" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} disabled={uploading} />
+                  <Button onClick={uploadFile} disabled={!selectedFile || uploading}>
+                    <Upload className="mr-2 h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="font-medium">{report.reportFile?.filename || 'Report.pdf'}</p>
+                    <a href={report.reportFile?.url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">View / Download</a>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => { navigator.clipboard?.writeText(report.reportFile?.url || ''); toast({ title: 'Copied', description: 'File URL copied' }); }}>Copy URL</Button>
+                  <Button size="sm" variant="outline" onClick={() => { setSelectedFile(null); setReport({ ...report, reportFile: null }); }}>Replace</Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+
+
+
 
         {/* Workflow actions */}
 <Card>
@@ -750,44 +753,7 @@ const saveProcedureDetails = async () => {
       <StatusBadge status="approved" />
     )}
 
-    {/* Upload option always visible in pending and approved */}
-    {!report.reportFile ? (
-      <div className="space-y-3">
-        <Label>Upload final PDF</Label>
-        <div className="flex gap-2 items-center">
-          <Input
-            type="file"
-            accept="application/pdf,image/*"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            disabled={uploading}
-          />
 
-          <Button onClick={uploadFile} disabled={!selectedFile || uploading}>
-            <Upload className="mr-2 h-4 w-4" />
-            {uploading ? "Uploading…" : "Upload"}
-          </Button>
-        </div>
-      </div>
-    ) : (
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-3">
-          <FileText className="h-8 w-8 text-primary" />
-          <div>
-            <p className="font-medium">
-              {report.reportFile?.filename || "Report.pdf"}
-            </p>
-            <a
-              href={report.reportFile?.url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-primary hover:underline"
-            >
-              View / Download
-            </a>
-          </div>
-        </div>
-      </div>
-    )}
   </CardContent>
 </Card>
 

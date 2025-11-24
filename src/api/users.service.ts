@@ -1,6 +1,11 @@
 import axios from "./axios";
 
 export const usersService = {
+
+delete: async (id: string) => {
+  const res = await axios.delete(`/api/users/${id}`);
+  return res.data;
+},
   getAll: async () => {
     const res = await axios.get("/api/users");
     return res.data;

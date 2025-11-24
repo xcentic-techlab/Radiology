@@ -12,14 +12,19 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { paymentsService, Payment } from '@/api/payments.service';
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { paymentMethodLabels } from '@/utils/statusConfig';
 import { format } from 'date-fns';
+import { useSearchParams } from "react-router-dom";
+import type { Payment } from "@/api/payments.service";
+import { paymentsService } from "@/api/payments.service";
 
 const Payments = () => {
   const { toast } = useToast();
+  
+const [searchParams] = useSearchParams();
+
 
   const [payments, setPayments] = useState<Payment[]>([]);
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([]);
@@ -34,6 +39,13 @@ const Payments = () => {
   useEffect(() => {
     fetchPayments();
   }, []);
+
+
+  useEffect(() => {
+  const statusFromURL = searchParams.get("status");
+  if (statusFromURL) setFilterStatus(statusFromURL);
+}, [searchParams]);
+
 
   useEffect(() => {
     applyFilters();

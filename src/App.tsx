@@ -13,7 +13,7 @@ import Login from "@/pages/Login";
 
 /* ===================== ADMIN ===================== */
 import AdminDashboard from "@/pages/admin/AdminDashboard";
-import Users from "@/pages/admin/Users";
+import Users from "@/pages/admin/Employee";
 import Departments from "@/pages/admin/Departments";
 import Payments from "@/pages/admin/Payments";
 import AdminReports from "@/pages/admin/AdminReports";
@@ -88,7 +88,7 @@ const App = () => (
           />
 
           <Route
-            path="/admin/users"
+            path="/admin/employee"
             element={
               <ProtectedRoute>
                 <RoleGuard allowedRoles={["admin", "super_admin"]}>
@@ -245,7 +245,7 @@ const App = () => (
           />
 
           <Route
-            path="/department/cases"
+            path="/department/create-reports"
             element={
               <ProtectedRoute>
                 <RoleGuard allowedRoles={["department_user"]}>

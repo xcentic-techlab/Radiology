@@ -16,6 +16,7 @@ import { departmentsService, Department } from '@/api/departments.service';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import CreateDepartmentDialog from '@/components/dialogs/CreateDepartmentDialog';
+import {Trash2} from "lucide-react"
 
 const Departments = () => {
   const { toast } = useToast();
@@ -28,6 +29,9 @@ const Departments = () => {
 
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+const [deleteLoading, setDeleteLoading] = useState(false);
+
 
   useEffect(() => {
     fetchDepartments();
@@ -92,8 +96,72 @@ const Departments = () => {
     }
   };
 
+  const handleDelete = async () => {
+  if (!deleteTarget) return;
+  setDeleteLoading(true);
+
+  try {
+    await departmentsService.delete(deleteTarget._id);
+
+    toast({
+      title: "Deleted",
+      description: "Department deleted successfully.",
+    });
+
+    setDepartments(prev => prev.filter(d => d._id !== deleteTarget._id));
+    setFilteredDepartments(prev => prev.filter(d => d._id !== deleteTarget._id));
+
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to delete department",
+      variant: "destructive",
+    });
+  } finally {
+    setDeleteLoading(false);
+    setDeleteTarget(null);
+  }
+};
+
+
   return (
     <DashboardLayout>
+
+      {deleteTarget && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl">
+      
+      <h2 className="text-xl font-bold text-gray-800">Delete Department?</h2>
+
+      <p className="text-sm text-slate-600 mt-2">
+        This will permanently delete 
+        <span className="font-semibold text-red-600">
+          {" "}{deleteTarget.name}
+        </span>.
+      </p>
+
+      <div className="flex justify-end gap-3 mt-5">
+        <Button
+          variant="outline"
+          className="rounded-lg"
+          onClick={() => setDeleteTarget(null)}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={deleteLoading}
+          className="rounded-lg"
+        >
+          {deleteLoading ? "Deleting..." : "Delete"}
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
       <div className="space-y-6">
 
         {/* HEADER */}
@@ -150,6 +218,7 @@ const Departments = () => {
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
+
                 </TableRow>
               </TableHeader>
 
@@ -196,16 +265,34 @@ const Departments = () => {
                         )}
                       </TableCell>
 
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 border border-gray-300 hover:bg-gray-100 rounded-md"
-                          onClick={() => handleToggleActive(dept._id, dept.isActive)}
-                        >
-                          <Power className="h-4 w-4 text-gray-700" />
-                        </Button>
-                      </TableCell>
+<TableCell className="text-right">
+  <div className="flex justify-end items-center gap-3">
+
+    {/* TOGGLE ACTIVE */}
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 border border-gray-300 hover:bg-gray-100 rounded-md"
+      onClick={() => handleToggleActive(dept._id, dept.isActive)}
+    >
+      <Power className="h-4 w-4 text-gray-700" />
+    </Button>
+
+    {/* DELETE BUTTON */}
+    <button
+      onClick={() => setDeleteTarget(dept)}
+      className="
+        w-9 h-9 flex items-center justify-center 
+        rounded-full bg-red-600 text-white shadow-sm
+        hover:bg-red-700 transition
+      "
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+
+  </div>
+</TableCell>
+
 
                     </TableRow>
                   ))

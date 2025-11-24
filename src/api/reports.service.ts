@@ -20,10 +20,6 @@ export const reportsService = {
     const res = await axios.get(`/api/reports/department/${deptId}`);
     return res.data;
   },
-  delete: async (id: string) => {
-  const res = await axios.delete(`/api/reports/${id}`);
-  return res.data;
-},
 
 
   getDepartmentCases: async (deptId: string) => {
@@ -64,4 +60,9 @@ uploadFile: async (reportId: string, file: File) => {
     const res = await axios.post(`/api/reports/${id}/approve`);
     return res.data;
   },
+
+    deleteReport: async (reportId: string) => {
+    const res = await axios.delete(`/api/reports/${reportId}`);
+    return res.data;
+  }
 };

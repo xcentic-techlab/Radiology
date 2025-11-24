@@ -86,6 +86,12 @@ uploadGovtId: async (id: string, file: File) => {
   return res.data;
 },
 
+delete: async (id: string) => {
+  const res = await api.delete(`/api/patients/${id}`);
+  return res.data;
+},
+
+
 
 };
 

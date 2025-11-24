@@ -35,4 +35,10 @@ export const departmentsService = {
     const res = await api.put(`/api/departments/${id}`, data);
     return res.data;
   },
+
+  delete: async (id: string) => {
+  const res = await api.delete(`/api/departments/${id}`);
+  return res.data;
+}
+
 };

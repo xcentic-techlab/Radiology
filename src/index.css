@@ -125,3 +125,35 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+
+/* Hide scrollbar for Chrome, Safari */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+
+/* Hide Chrome/Safari scrollbar */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide Firefox scrollbar */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar but keep scroll working */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE */
+  scrollbar-width: none;     /* Firefox */
+}
+

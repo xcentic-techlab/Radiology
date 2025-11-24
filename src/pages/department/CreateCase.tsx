@@ -173,7 +173,7 @@ useEffect(() => {
       await casesService.create(payload);
 
       toast({ title: "Success", description: "Case created successfully" });
-      navigate("/department/cases");
+      navigate("/department/create-reports");
     } catch (err) {
       toast({
         title: "Error",
@@ -291,7 +291,7 @@ return (
                 type="button"
                 variant="outline"
                 className="rounded-xl"
-                onClick={() => navigate("/department/cases")}
+                onClick={() => navigate("/department/create-reports")}
               >
                 Cancel
               </Button>

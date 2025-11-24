@@ -24,7 +24,7 @@ const Sidebar = () => {
     if (role === "super_admin" || role === "admin") {
       return [
         { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-        { to: "/admin/users", icon: Users, label: "Users" },
+        { to: "/admin/employee", icon: Users, label: "Employee" },
         { to: "/admin/departments", icon: Building2, label: "Departments" },
         { to: "/admin/payments", icon: CreditCard, label: "Payments" },
         { to: "/admin/reports", icon: FileText, label: "All Reports" },
@@ -41,7 +41,7 @@ const Sidebar = () => {
     if (role === "department_user") {
       return [
         { to: "/department/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-        { to: "/department/cases", icon: FileSearch, label: "Create Report" },
+        { to: "/department/create-reports", icon: FileSearch, label: "Create Report" },
         { to: "/department/create-cases", icon: FileText, label: "Create Cases" },
       ];
     }

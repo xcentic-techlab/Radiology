@@ -34,7 +34,7 @@ const PatientReportDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   if (loading) return <DashboardLayout>Loading...</DashboardLayout>;
   if (!report)

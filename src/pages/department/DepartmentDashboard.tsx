@@ -1,170 +1,197 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, Clock } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Calendar, CheckCircle, Clock, FolderPlus } from "lucide-react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { reportsService } from "@/api/reports.service";
 import { useAuthStore } from "@/store/authStore";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 const DepartmentDashboard = () => {
-  const { toast } = useToast();
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState({
-    pending: 0,
-    approved: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  // popups
+  const [openOverview, setOpenOverview] = useState(false);
+  const [openStatus, setOpenStatus] = useState(false);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  /* -----------------------------
+     REPORT OVERVIEW FILTERS
+  ----------------------------- */
+  const overviewFilters = [
+    { label: "Today's Reports", value: "today" },
+    { label: "Yesterday", value: "yesterday" },
+    { label: "Last 7 Days", value: "week" },
+    { label: "Last 30 Days", value: "month" },
+    { label: "Last 1 Year", value: "year" },
+    { label: "Custom Range", value: "custom" },
+  ];
 
-  const fetchStats = async () => {
-    try {
-      if (!user?.department?._id) {
-        setLoading(false);
-        return;
-      }
-
-      const reports = await reportsService.getByDepartment(
-        user.department._id
-      );
-
- const approved = reports.filter(
-  (r) => r.status?.toLowerCase() === "approved"
-).length;
-
-const pending = reports.filter(
-  (r) => r.status?.toLowerCase() !== "approved"
-).length;
-
-
-
-      setStats({ pending, approved });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard stats",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const statCards = [
-    {
-      title: "Pending Reports",
-      value: stats.pending,
-      icon: Clock,
-      color: "bg-yellow-100 text-yellow-600",
-      route: "/department/reports?status=pending",
-    },
-    {
-      title: "Approved Reports",
-      value: stats.approved,
-      icon: CheckCircle,
-      color: "bg-green-100 text-green-600",
-      route: "/department/reports?status=approved",
-    },
+  /* -----------------------------
+     REPORT STATUS FILTERS
+  ----------------------------- */
+  const statusFilters = [
+    { label: "Pending Reports", value: "pending" },
+    { label: "Approved Reports", value: "approved" },
   ];
 
   return (
-  <DashboardLayout>
-    <div className="space-y-10">
+    <DashboardLayout>
+      <div className="space-y-10">
 
-      {/* HEADER SECTION */}
-<div className="space-y-3">
+        {/* HEADER */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
+            Department Dashboard
+          </h1>
+          <p className="text-muted-foreground text-base">
+            Manage and track reports efficiently
+          </p>
 
-  {/* CENTER HEADING */}
-  <div className="text-center">
-    <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
-      Department Dashboard
-    </h1>
+          {/* Department badge */}
+          <div className="flex justify-center mt-3">
+            <div className="px-5 py-2 rounded-xl bg-white/70 backdrop-blur-md border shadow">
+              <span className="text-sm font-semibold">
+                Department:{" "}
+                <span className="font-bold capitalize text-blue-700">
+                  {user?.department?.name}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
 
-    <p className="text-muted-foreground text-base">
-      Manage and track all your department reports
-    </p>
-  </div>
+        {/* MAIN CARDS (Reception style) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-  {/* BADGE — BELOW HEADING, RIGHT SIDE */}
-  <div className="flex justify-end">
-    <div
-      className="px-5 py-2 rounded-xl 
-                 bg-white/60 backdrop-blur-md 
-                 border border-white/40 shadow-md"
-    >
-      <span className="text-sm font-semibold text-primary">
-        Department:{" "}
-        <span className="font-bold capitalize">
-          {user?.department?.name || "Not Assigned"}
-        </span>
-      </span>
-    </div>
-  </div>
-
-</div>
-
-
-
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {statCards.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.15 }}
+          {/* REPORT OVERVIEW */}
+          <Card
+            onClick={() => setOpenOverview(true)}
+            className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
           >
-            <Card
-              onClick={() => navigate(stat.route)}
-              className="rounded-2xl cursor-pointer 
-                         bg-white/50 backdrop-blur-md 
-                         border border-white/40 shadow-lg 
-                         hover:shadow-xl hover:scale-[1.02]
-                         transition-all duration-300"
-            >
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <CardTitle className="text-base font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
+            <CardHeader className="flex flex-row justify-between">
+              <CardTitle>Report Overview</CardTitle>
+              <Calendar className="h-7 w-7 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-blue-700 font-medium">View →</p>
+            </CardContent>
+          </Card>
 
-                {/* Icon bubble */}
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className={`p-2 rounded-full ${stat.color} shadow-sm`}
+          {/* REPORT STATUS */}
+          <Card
+            onClick={() => setOpenStatus(true)}
+            className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
+          >
+            <CardHeader className="flex flex-row justify-between">
+              <CardTitle>Report Status</CardTitle>
+              <Clock className="h-7 w-7 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-blue-700 font-medium">View →</p>
+            </CardContent>
+          </Card>
+
+          {/* QUICK CREATE CASE */}
+          <Card
+            onClick={() => navigate("/department/create-cases")}
+            className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
+          >
+            <CardHeader className="flex flex-row justify-between">
+              <CardTitle>Quick Create Case</CardTitle>
+              <FolderPlus className="h-7 w-7 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-blue-700 font-medium">Create →</p>
+            </CardContent>
+          </Card>
+
+        </div>
+
+        {/* ----------------------------------
+           POPUP 1 : REPORT OVERVIEW MODAL
+        ---------------------------------- */}
+        <Dialog open={openOverview} onOpenChange={setOpenOverview}>
+          <DialogContent className="max-w-md rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">
+                Report Overview
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3">
+              {overviewFilters.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() =>
+                    navigate(`/department/reports?date=${opt.value}`)
+                  }
+                  className="p-3 rounded-xl bg-white hover:bg-slate-100 border shadow-sm cursor-pointer transition"
                 >
-                  <stat.icon className="h-6 w-6" />
-                </motion.div>
-              </CardHeader>
-
-              <CardContent>
-                <div className="text-4xl font-extrabold tracking-tight">
-                  {loading ? "..." : stat.value}
+                  {opt.label}
                 </div>
+              ))}
 
-                <p className="text-sm text-muted-foreground mt-1">
-                  Click to view details
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+              <button
+                onClick={() => setOpenOverview(false)}
+                className="w-full py-2 rounded-xl bg-blue-600 text-white font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ----------------------------------
+           POPUP 2 : REPORT STATUS MODAL
+        ---------------------------------- */}
+        <Dialog open={openStatus} onOpenChange={setOpenStatus}>
+          <DialogContent className="max-w-md rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">
+                Report Status
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3">
+              {statusFilters.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() =>
+                    navigate(`/department/reports?status=${opt.value}`)
+                  }
+                  className="p-3 rounded-xl bg-white hover:bg-slate-100 border shadow-sm cursor-pointer transition"
+                >
+                  {opt.label}
+                </div>
+              ))}
+
+              <button
+                onClick={() => setOpenStatus(false)}
+                className="w-full py-2 rounded-xl bg-blue-600 text-white font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
-    </div>
-  </DashboardLayout>
-);
-
+    </DashboardLayout>
+  );
 };
 
 export default DepartmentDashboard;

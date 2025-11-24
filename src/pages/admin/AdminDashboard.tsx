@@ -8,6 +8,8 @@ import { reportsService } from "@/api/reports.service";
 import { paymentsService } from "@/api/payments.service";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { X } from "lucide-react";
+
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -20,8 +22,14 @@ export default function AdminDashboard() {
     totalRevenue: 0,
   });
 
+  const [departments, setDepartments] = useState([]);
+  const [revenueModal, setRevenueModal] = useState(false);
+
+  const [openDeptModal, setOpenDeptModal] = useState(false);
+
   useEffect(() => {
     loadStats();
+    loadDepartments();
   }, []);
 
   async function loadStats() {
@@ -38,9 +46,9 @@ export default function AdminDashboard() {
         .reduce((sum, p) => sum + (p.amount || 0), 0);
 
       setStats({
-        totalUsers: (users || []).length,
-        totalDepartments: (departments || []).length,
-        totalReports: (reports || []).length,
+        totalUsers: users.length,
+        totalDepartments: departments.length,
+        totalReports: reports.length,
         totalRevenue: revenue,
       });
     } catch (err) {
@@ -52,88 +60,197 @@ export default function AdminDashboard() {
     }
   }
 
+  async function loadDepartments() {
+    try {
+      const res = await departmentsService.getAll();
+      setDepartments(res);
+    } catch (err) {
+      console.log("Failed to load departments");
+    }
+  }
+
   const CARDS = [
     {
       title: "Total Reports",
-      val: stats.totalReports,
+      subtitle: "View →",
+      value: stats.totalReports,
       icon: FileText,
-      onClick: () => navigate("/admin/reports"),
+      onClick: () => setOpenDeptModal(true),
     },
     {
       title: "Workload (Departments)",
-      val: stats.totalDepartments,
+      subtitle: "View →",
+      value: stats.totalDepartments,
       icon: Building2,
       onClick: () => navigate("/admin/workload"),
     },
+{
+  title: "Revenue",
+  subtitle: "View →",
+  value: `₹${stats.totalRevenue.toLocaleString()}`,
+  icon: DollarSign,
+  onClick: () => setRevenueModal(true),
+},
     {
-      title: "Revenue",
-      val: `₹${stats.totalRevenue.toLocaleString()}`,
-      icon: DollarSign,
-      onClick: () => navigate("/admin/payments"),
-    },
-    {
-      title: "Total Users",
-      val: stats.totalUsers,
+      title: "Total Employee",
+      subtitle: "View →",
+      value: stats.totalUsers,
       icon: Users,
       onClick: () => navigate("/admin/users-filter"),
     },
   ];
 
+
+  
+
   return (
-<DashboardLayout>
-  {/* HEADER */}
-  <div className="mb-8 text-center">
-  <h1 className="text-4xl font-bold tracking-tight">
-    Admin Dashboard
-  </h1>
-  <p className="text-muted-foreground mt-1">
-    Overview of system metrics and performance
-  </p>
-</div>
+    <DashboardLayout>
+
+      {/* HEADER */}
+      <div className="text-center space-y-2 mt-6">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+          Admin Dashboard
+        </h1>
+        <p className="text-muted-foreground text-base">
+          Overview of system metrics and performance
+        </p>
+      </div>
+
+      {/* UPDATED UI CARDS (Screenshot style) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+
+        {CARDS.map((c, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.06 }}
+            onClick={c.onClick}
+            className="cursor-pointer"
+          >
+            <div className="
+              bg-blue-50 border border-blue-100 
+              rounded-2xl p-6 shadow-sm 
+              hover:bg-[#e8f1ff] hover:shadow-xl 
+              transition-all duration-200
+              flex justify-between items-start
+            ">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">{c.title}</h2>
+               <p className="text-3xl font-bold text-gray-900 mt-3">{c.value}</p>
 
 
-  {/* CARDS GRID */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    {CARDS.map((c, i) => (
-      <motion.div
-        key={i}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: i * 0.07 }}
-        whileHover={{ scale: 1.03 }}
-        onClick={c.onClick}
-        className="cursor-pointer"
-      >
-        <div
-          className="
-            p-6 rounded-2xl shadow-lg border 
-            bg-white/60 backdrop-blur-md 
-            hover:bg-white/80 hover:shadow-xl 
-            transition-all duration-200
-          "
-        >
-          <div className="flex justify-between items-center">
-            <div>
-              <span className="text-sm text-gray-600">{c.title}</span>
-              <div className="text-4xl font-bold mt-2 text-gray-900">
-                {c.val}
+                <button className="text-blue-600 mt-4 hover:underline text-sm font-medium">
+                  {c.subtitle}
+                </button>
               </div>
-            </div>
 
-            <div
-              className="
-                p-3 rounded-xl bg-primary/10 
-                text-primary shadow-sm
-              "
-            >
-              <c.icon className="w-8 h-8" />
+              <c.icon className="w-8 h-8 text-blue-600" />
             </div>
-          </div>
-        </div>
-      </motion.div>
-    ))}
+          </motion.div>
+        ))}
+
+      </div>
+
+      {/* DEPARTMENT SELECT MODAL */}
+      {openDeptModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl relative">
+
+      {/* CLOSE ICON */}
+      <button
+        onClick={() => setOpenDeptModal(false)}
+        className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200"
+      >
+        <X className="w-5 h-5 text-gray-600" />
+      </button>
+
+      <h2 className="text-xl font-bold text-gray-800">Department Reports</h2>
+
+      <div className="mt-4 space-y-3">
+        {departments.map((d) => (
+          <button
+            key={d._id}
+            onClick={() => {
+              setOpenDeptModal(false);
+              navigate(`/admin/reports?dept=${d._id}`);
+            }}
+            className="w-full text-left px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
+          >
+            {d.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex justify-end mt-5">
+        <button
+          onClick={() => setOpenDeptModal(false)}
+          className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+        >
+          Cancel
+        </button>
+      </div>
+
+    </div>
   </div>
-</DashboardLayout>
+)}
 
+
+
+{revenueModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl relative">
+
+      {/* CLOSE ICON */}
+      <button
+        onClick={() => setRevenueModal(false)}
+        className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200"
+      >
+        <X className="w-5 h-5 text-gray-600" />
+      </button>
+
+      <h2 className="text-xl font-bold text-gray-800 text-center">
+        Choose Payment Status
+      </h2>
+
+      <div className="mt-5 space-y-3">
+
+        <button
+          onClick={() => {
+            setRevenueModal(false);
+            navigate("/admin/payments?status=pending");
+          }}
+          className="w-full px-4 py-3 text-left rounded-lg border hover:bg-gray-100 transition"
+        >
+          Pending Payments
+        </button>
+
+        <button
+          onClick={() => {
+            setRevenueModal(false);
+            navigate("/admin/payments?status=success");
+          }}
+          className="w-full px-4 py-3 text-left rounded-lg border hover:bg-gray-100 transition"
+        >
+          Successful Payments
+        </button>
+
+      </div>
+
+      <div className="flex justify-end mt-5">
+        <button
+          onClick={() => setRevenueModal(false)}
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+    </DashboardLayout>
   );
 }

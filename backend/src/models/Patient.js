@@ -64,11 +64,12 @@ const patientSchema = new mongoose.Schema(
     },
 
     // Store department name directly (MRI / CT etc.)
-    assignedDepartment: {
+assignedDepartment: {
   type: String,
-  enum: ["mri", "ct scan", "pathology", "x-ray", "ultrasound", "ecg", "xray", "Nuclear Medicine"],
-  set: (v) => v.toLowerCase(),
+  set: (v) => v?.toLowerCase(),
+  default: null,
 },
+
 
 
     // Kisne assign kiya (Reception/Admin)

@@ -19,19 +19,19 @@ export const casesService = {
     return res.data;
   },
 
-  // Assign staff to case
+  // Assign staff
   assign: async (caseId: string, assignedTo: string) => {
     const res = await axios.put(`/api/cases/${caseId}/assign`, { assignedTo });
     return res.data;
   },
 
-  // Update case (status, procedure etc.)
+  // Update case
   update: async (caseId: string, data: any) => {
     const res = await axios.put(`/api/cases/${caseId}`, data);
     return res.data;
   },
 
-  // Upload report to this case
+  // Upload report file
   uploadReport: async (caseId: string, file: File) => {
     const fd = new FormData();
     fd.append("file", file);
@@ -42,4 +42,16 @@ export const casesService = {
 
     return res.data;
   },
+
+  // Create empty report
+  createReport: async (caseId: string) => {
+    const res = await axios.post(`/api/reports/create/${caseId}`);
+    return res.data;
+  },
+
+  deleteCase: async (caseId) => {
+  const res = await axios.delete(`/api/cases/${caseId}`);
+  return res.data;
+}
+
 };

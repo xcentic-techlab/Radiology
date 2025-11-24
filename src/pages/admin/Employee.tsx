@@ -14,6 +14,7 @@ import type { User, Department } from "@/types/models";
 import { useToast } from '@/hooks/use-toast';
 import { roleLabels } from '@/utils/statusConfig';
 import CreateUserDialog from '@/components/dialogs/CreateUserDialog';
+import {Trash2} from "lucide-react"
 
 const Users = () => {
   const { toast } = useToast();
@@ -21,6 +22,9 @@ const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+const [deleteLoading, setDeleteLoading] = useState(false);
+
 
   const [search, setSearch] = useState('');
   const [filterDepartment, setFilterDepartment] = useState("all");
@@ -28,6 +32,12 @@ const Users = () => {
 
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+
+  const handleDeleteUser = async (user: User) => {
+  setDeleteUser(user);
+};
+
 
   useEffect(() => {
     fetchData();
@@ -102,14 +112,72 @@ const Users = () => {
     }
   };
 
+
+
+  const confirmDelete = async () => {
+  if (!deleteUser) return;
+
+  setDeleteLoading(true);
+
+  try {
+    await usersService.delete(deleteUser._id);
+
+    toast({
+      title: "User Deleted",
+      description: `${deleteUser.name} has been removed.`,
+    });
+
+    setDeleteUser(null);
+    fetchData();
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Unable to delete user",
+      variant: "destructive",
+    });
+  } finally {
+    setDeleteLoading(false);
+  }
+};
+
+
   return (
     <DashboardLayout>
+
+      {deleteUser && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-2xl w-[350px] shadow-xl">
+
+      <h2 className="text-xl font-bold">Delete User?</h2>
+      <p className="text-sm text-gray-600 mt-2">
+        Are you sure you want to delete 
+        <span className="font-semibold"> {deleteUser.name} </span>?
+        This action cannot be undone.
+      </p>
+
+      <div className="flex justify-end gap-3 mt-5">
+        <Button variant="outline" onClick={() => setDeleteUser(null)}>
+          Cancel
+        </Button>
+
+        <Button 
+          variant="destructive" 
+          onClick={confirmDelete}
+          disabled={deleteLoading}
+        >
+          {deleteLoading ? "Deleting..." : "Delete"}
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
       <div className="space-y-6">
 
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
             <p className="text-muted-foreground">Manage system users and their roles</p>
           </div>
 
@@ -230,16 +298,31 @@ const Users = () => {
                       </TableCell>
 
                       <TableCell className="text-right pr-6">
-                        <Button
-  variant="ghost"
-  size="icon"
-  className="h-8 w-8 border border-gray-300 hover:bg-gray-100 rounded-md"
-  onClick={() => handleToggleActive(user._id, user.isActive)}
->
-  <Power className="h-4 w-4 text-gray-700" />
-</Button>
+  <div className="flex justify-end gap-2">
 
-                      </TableCell>
+    {/* Toggle Active Btn */}
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 border border-gray-300 hover:bg-gray-100 rounded-md"
+      onClick={() => handleToggleActive(user._id, user.isActive)}
+    >
+      <Power className="h-4 w-4 text-gray-700" />
+    </Button>
+
+    {/* DELETE USER BTN */}
+    <Button
+      variant="destructive"
+      size="icon"
+      className="h-8 w-8 hover:bg-red-700 rounded-md"
+      onClick={() => handleDeleteUser(user)}
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+
+  </div>
+</TableCell>
+
                     </TableRow>
                   ))
                 )}

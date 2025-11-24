@@ -131,9 +131,9 @@ export default function UsersFilter() {
 
         {/* PAGE HEADER */}
         <div className="text-center space-y-1">
-          <h1 className="text-4xl font-bold">Users Directory</h1>
+          <h1 className="text-4xl font-bold">Employee Directory</h1>
           <p className="text-muted-foreground">
-            Filter and explore all system users
+            Filter and explore all system employee
           </p>
         </div>
 

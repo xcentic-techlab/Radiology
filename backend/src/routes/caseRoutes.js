@@ -10,8 +10,42 @@ import {
 import auth from "../middlewares/authMiddleware.js";
 import { permit } from "../middlewares/roleMiddleware.js";
 import { uploadReport as upload } from "../middlewares/cloudUpload.js";
+import Case from "../models/Case.js";
+import Report from "../models/Report.js";
+
 
 const router = express.Router();
+
+
+
+router.delete(
+  "/:id",
+  auth,
+  permit("department_user", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const caseData = await Case.findById(id);
+      if (!caseData) {
+        return res.status(404).json({ message: "Case not found" });
+      }
+
+      // Clear report if attached
+      if (caseData.reportId) {
+        await Report.findByIdAndDelete(caseData.reportId);
+      }
+
+      await Case.findByIdAndDelete(id);
+
+      res.json({ success: true, message: "Case deleted successfully" });
+    } catch (err) {
+      console.error("DELETE CASE ERROR:", err);
+      res.status(500).json({ message: "Server error deleting case" });
+    }
+  }
+);
+
 
 router.post("/create", createCase);
 router.get("/department/:deptId", getCasesByDepartment);
@@ -56,6 +90,35 @@ router.post(
     }
   }
 );
+
+router.delete(
+  "/:id",
+  auth,
+  permit("department_user", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const caseData = await Case.findById(id);
+      if (!caseData) {
+        return res.status(404).json({ message: "Case not found" });
+      }
+
+      // Clear report if attached
+      if (caseData.reportId) {
+        await Report.findByIdAndDelete(caseData.reportId);
+      }
+
+      await Case.findByIdAndDelete(id);
+
+      res.json({ success: true, message: "Case deleted successfully" });
+    } catch (err) {
+      console.error("DELETE CASE ERROR:", err);
+      res.status(500).json({ message: "Server error deleting case" });
+    }
+  }
+);
+
 
 
 export default router;

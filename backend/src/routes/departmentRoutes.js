@@ -8,12 +8,34 @@ import {
 import auth from "../middlewares/authMiddleware.js";
 import { permit } from "../middlewares/roleMiddleware.js";
 import Patient from "../models/Patient.js";
+import Department from "../models/Department.js";
+
 
 const router = express.Router();
 
 /**********************************
  *  CREATE / LIST / UPDATE / DELETE
  **********************************/
+router.delete(
+  "/:id",
+  auth,
+  permit("admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const dept = await Department.findById(req.params.id);
+      if (!dept) return res.status(404).json({ message: "Department not found" });
+
+      await Department.findByIdAndDelete(req.params.id);
+
+      res.json({ success: true, message: "Department deleted" });
+    } catch (err) {
+      console.error("DELETE DEPT ERROR:", err);
+      res.status(500).json({ message: "Server error deleting department" });
+    }
+  }
+);
+
+
 router.get("/", auth, listDepartments);
 router.post("/", auth, permit("super_admin", "admin"), createDepartment);
 router.put("/:id", auth, permit("super_admin", "admin"), updateDepartment);

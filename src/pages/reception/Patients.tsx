@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSearchParams } from "react-router-dom";
 import { departmentsService } from "@/api/departments.service";
+import { Trash2 } from "lucide-react";
+
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -38,6 +40,9 @@ const Patients = () => {
   const [params] = useSearchParams();
   const [departments, setDepartments] = useState([]);
   const [searchById, setSearchById] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
+
 
   
 
@@ -48,10 +53,25 @@ const [filters, setFilters] = useState({
   payment: params.get("filter") === "paid" ? "paid" :
             params.get("filter") === "pending" ? "pending" : "",
   department: params.get("department") ?? "",
-  date: "all",
+    date: params.get("date") ?? "all",
   customFrom: "",
   customTo: "",
 });
+
+useEffect(() => {
+  setFilters((prev) => ({
+    ...prev,
+    date: params.get("date") ?? "all",
+    department: params.get("department") ?? "",
+    payment:
+      params.get("filter") === "paid"
+        ? "paid"
+        : params.get("filter") === "pending"
+        ? "pending"
+        : "",
+  }));
+}, [params]);
+
 
 useEffect(() => {
   let data = [...patients];
@@ -105,9 +125,13 @@ useEffect(() => {
   // -------------------------------
   // 6) DEPARTMENT FILTER
   // -------------------------------
-  if (filters.department) {
-    data = data.filter((p) => p.assignedDepartment === filters.department);
-  }
+if (filters.department) {
+  data = data.filter(
+    (p) =>
+      p.assignedDepartment &&
+      p.assignedDepartment.toLowerCase() === filters.department.toLowerCase()
+  );
+}
 
   // -------------------------------
   // 7) DATE FILTER
@@ -228,9 +252,13 @@ useEffect(() => {
   }
 
   // DEPARTMENT
-  if (filters.department) {
-    data = data.filter((p) => p.assignedDepartment === filters.department);
-  }
+if (filters.department) {
+  data = data.filter(
+    (p) =>
+      p.assignedDepartment &&
+      p.assignedDepartment.toLowerCase() === filters.department.toLowerCase()
+  );
+}
 
   // DATE
   if (filters.date !== "all") {
@@ -268,19 +296,65 @@ useEffect(() => {
 }, [patients, searchById, search, filters]);
 
 
+const handleDeletePatient = async () => {
+  if (!patientToDelete) return;
+
+  try {
+    await patientsService.delete(patientToDelete);
+
+    toast({
+      title: "Deleted",
+      description: "Patient record removed successfully",
+    });
+
+    setDeleteDialogOpen(false);
+    fetchPatients();
+  } catch (err) {
+    toast({
+      title: "Error",
+      description: "Failed to delete patient",
+      variant: "destructive",
+    });
+  }
+};
+
 
 
 const handleMarkPaid = async (patient: Patient) => {
   openDummyRazorpay({
-    // name: patient.firstName + " " + patient.lastName,
-    // amount: 500, // 💰 test amount
     onSuccess: async () => {
-      await patientsService.updatePayment(patient._id);
-      toast({ title: "Payment Successful" });
-      fetchPatients();
+      try {
+        // STEP 1: Mark Paid
+        await patientsService.updatePayment(patient._id);
+
+        // STEP 2: Auto-assign department (using patient.assignedDepartment)
+        const dept = departments.find(
+          (d) => d.name.trim().toLowerCase() === patient.assignedDepartment.trim().toLowerCase()
+        );
+
+        if (dept) {
+          await patientsService.assignDepartment(patient._id, {
+            departmentId: dept._id,
+            departmentName: dept.name,
+          });
+        }
+
+        toast({ title: "Payment Successful and Department Assigned" });
+
+        // STEP 3: Refresh list
+        fetchPatients();
+
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Payment done but department auto-assign failed",
+          variant: "destructive",
+        });
+      }
     },
   });
 };
+
 
 const handleAssignDepartment = async (patient: Patient) => {
   try {
@@ -469,6 +543,7 @@ fetchPatients();
                   <TableHead>Status</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Govt ID</TableHead>
+                  <TableHead>Delete</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -509,43 +584,56 @@ fetchPatients();
 
                     {/* Department */}
                     <TableCell>
-                      {patient.paymentStatus !== "paid" ? (
-                        <span className="text-yellow-700 font-semibold">Payment Pending</span>
-                      ) : !patient.departmentAssignedTo ? (
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAssignDepartment(patient);
-                          }}
-                        >
-                          Assign Dept
-                        </Button>
-                      ) : (
+                      {patient.assignedDepartment ? (
                         <span className="text-blue-700 font-semibold">
                           {patient.assignedDepartment}
                         </span>
+                      ) : (
+                        <span className="text-red-600 font-semibold">Pending</span>
                       )}
                     </TableCell>
 
                     {/* Govt ID */}
+                   <TableCell>
+  {patient.govtId?.fileUrl ? (
+    <div className="flex items-start gap-3">
+      <img
+        src={patient.govtId.fileUrl}
+        alt="Govt ID"
+        className="h-12 w-20 rounded border shadow cursor-pointer hover:scale-110 transition"
+        onClick={(e) => {
+          e.stopPropagation();
+          window.open(patient.govtId.fileUrl, "_blank");
+        }}
+      />
+
+      <div className="flex flex-col">
+        <span className="text-sm font-semibold">{patient.govtId.idType}</span>
+        <span className="text-xs text-gray-700">{patient.govtId.idNumber}</span>
+      </div>
+    </div>
+  ) : (
+    "-"
+  )}
+</TableCell>
+
+
                     <TableCell>
-                      {patient.govtId?.fileUrl ? (
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={patient.govtId.fileUrl}
-                            alt="Govt ID"
-                            className="h-10 w-16 rounded border shadow cursor-pointer hover:scale-110 transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(patient.govtId.fileUrl, "_blank");
-                            }}
-                          />
-                          <span className="text-sm font-semibold">{patient.govtId.idType}</span>
-                        </div>
-                      ) : "-"}
-                    </TableCell>
+<Button
+  size="icon"
+  variant="destructive"
+  className="h-8 w-8 rounded-full"
+  onClick={(e) => {
+    e.stopPropagation();
+    setPatientToDelete(patient._id);
+    setDeleteDialogOpen(true);
+  }}
+>
+  <Trash2 className="h-4 w-4" />
+</Button>
+
+</TableCell>
+
 
                   </TableRow>
                 ))}
@@ -562,40 +650,85 @@ fetchPatients();
         open={true}
         onOpenChange={(open) => !open && setSelectedPatient(null)}
       >
-        <DialogContent className="max-w-xl rounded-2xl shadow-2xl bg-white/80 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Patient Details — {selectedPatient.firstName} {selectedPatient.lastName}
-            </DialogTitle>
-          </DialogHeader>
+<DialogContent className="max-w-3xl w-full rounded-2xl bg-white/90 backdrop-blur-xl shadow-2xl p-6">
+  <DialogHeader className="flex flex-col items-center text-center mb-4">
+    <DialogTitle className="text-xl font-bold">
+      Patient Details — {selectedPatient.firstName} {selectedPatient.lastName}
+    </DialogTitle>
+  </DialogHeader>
 
-          <div className="space-y-2 text-sm">
-            <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
-            <p><b>Age / Gender:</b> {selectedPatient.age} / {selectedPatient.gender}</p>
-            <p><b>Phone:</b> {selectedPatient.contact.phone}</p>
-            <p><b>Email:</b> {selectedPatient.contact.email || "-"}</p>
-            <p><b>Address:</b> {selectedPatient.address}</p>
-            <hr />
-            <p><b>Case Type:</b> {selectedPatient.caseType}</p>
-            <p><b>Description:</b> {selectedPatient.caseDescription}</p>
-            <p><b>Referred Doctor:</b> {selectedPatient.referredDoctor}</p>
-            <hr />
-            <p><b>Payment Status:</b> {selectedPatient.paymentStatus}</p>
-            <p><b>Report Status:</b> {selectedPatient.status}</p>
-            <p><b>Assigned Dept:</b> {selectedPatient.assignedDepartment || "-"}</p>
-            <hr />
-            <p><b>Clinical History:</b> {selectedPatient.clinicalHistory || "-"}</p>
-            <p><b>Previous Injury:</b> {selectedPatient.previousInjury || "-"}</p>
-            <p><b>Previous Surgery:</b> {selectedPatient.previousSurgery || "-"}</p>
-            <hr />
-            <p><b>Govt ID:</b> {selectedPatient.govtId?.idType}</p>
-            <p><b>ID Number:</b> {selectedPatient.govtId?.idNumber}</p>
-          </div>
+  {/* GRID LAYOUT 2 COLUMNS ON LARGE SCREENS */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
 
-          <Button className="mt-4" onClick={() => setSelectedPatient(null)}>
-            Close
-          </Button>
-        </DialogContent>
+    {/* LEFT COLUMN */}
+    <div className="space-y-4">
+
+      {/* BASIC INFO */}
+      <div>
+        <h3 className="font-semibold text-blue-800 mb-2">Basic Information</h3>
+        <div className="space-y-1">
+          <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
+          <p><b>Age / Gender:</b> {selectedPatient.age} / {selectedPatient.gender}</p>
+          <p><b>Phone:</b> {selectedPatient.contact.phone}</p>
+          <p><b>Email:</b> {selectedPatient.contact.email || "-"}</p>
+          <p><b>Address:</b> {selectedPatient.address}</p>
+        </div>
+      </div>
+
+      {/* CASE DETAILS */}
+      <div>
+        <h3 className="font-semibold text-blue-800 mb-2">Case Details</h3>
+        <div className="space-y-1">
+          <p><b>Case Type:</b> {selectedPatient.caseType}</p>
+          <p><b>Description:</b> {selectedPatient.caseDescription}</p>
+          <p><b>Referred Doctor:</b> {selectedPatient.referredDoctor || "-"}</p>
+        </div>
+      </div>
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-4">
+
+      {/* STATUS INFO */}
+      <div>
+        <h3 className="font-semibold text-blue-800 mb-2">Status</h3>
+        <div className="space-y-1">
+          <p><b>Payment Status:</b> {selectedPatient.paymentStatus}</p>
+          <p><b>Report Status:</b> {selectedPatient.status}</p>
+          <p><b>Assigned Dept:</b> {selectedPatient.assignedDepartment || "-"}</p>
+        </div>
+      </div>
+
+      {/* MEDICAL HISTORY */}
+      <div>
+        <h3 className="font-semibold text-blue-800 mb-2">Medical History</h3>
+        <div className="space-y-1">
+          <p><b>Clinical History:</b> {selectedPatient.clinicalHistory || "-"}</p>
+          <p><b>Previous Injury:</b> {selectedPatient.previousInjury || "-"}</p>
+          <p><b>Previous Surgery:</b> {selectedPatient.previousSurgery || "-"}</p>
+        </div>
+      </div>
+
+      {/* GOVT ID */}
+      <div>
+        <h3 className="font-semibold text-blue-800 mb-2">Government ID</h3>
+        <div className="space-y-1">
+          <p><b>ID Type:</b> {selectedPatient.govtId?.idType || "-"}</p>
+          <p><b>ID Number:</b> {selectedPatient.govtId?.idNumber || "-"}</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <Button
+    className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+    onClick={() => setSelectedPatient(null)}
+  >
+    Close
+  </Button>
+</DialogContent>
+
       </Dialog>
     )}
 
@@ -608,6 +741,39 @@ fetchPatients();
         fetchPatients();
       }}
     />
+
+    <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+  <DialogContent className="max-w-sm rounded-xl shadow-xl">
+    <DialogHeader>
+      <DialogTitle className="text-lg font-bold text-black-600">
+        Confirm Delete
+      </DialogTitle>
+    </DialogHeader>
+
+    <p className="text-sm text-gray-600">
+      Are you sure you want to delete this patient?
+      This action cannot be undone.
+    </p>
+
+    <div className="flex justify-end gap-3 mt-5">
+      <Button
+        variant="outline"
+        className="rounded-lg"
+        onClick={() => setDeleteDialogOpen(false)}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        className="bg-red-600 hover:bg-red-700 text-white rounded-lg"
+        onClick={handleDeletePatient}
+      >
+        Delete
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
+
   </DashboardLayout>
 );
 

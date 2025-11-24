@@ -5,8 +5,59 @@ import { permit } from "../middlewares/roleMiddleware.js";
 import Report from "../models/Report.js";
 import Patient from "../models/Patient.js";
 import { uploadReport as upload } from "../middlewares/cloudUpload.js";
+import Case from "../models/Case.js";
+import cloudinary from "../config/cloudinary.js";
 
 const router = express.Router();
+
+
+console.log("🔥 REPORT ROUTES LOADED FROM:", import.meta.url);
+
+router.delete(
+  "/:id",
+  auth,
+  permit("department_user", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("DELETE HIT", req.params.id);
+      // Find report
+      const report = await Report.findById(id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+
+      // Remove Cloudinary file if exists
+      if (report.reportFile?.public_id) {
+        try {
+          await cloudinary.uploader.destroy(report.reportFile.public_id);
+        } catch (e) {
+          console.log("Cloudinary delete failed", e);
+        }
+      }
+
+      // Remove link from case
+      if (report.caseId) {
+        await Case.findByIdAndUpdate(report.caseId, {
+          $unset: { reportId: "" },
+        });
+      }
+
+      // Delete report
+      await Report.findByIdAndDelete(id);
+
+      res.json({ success: true, message: "Report deleted successfully" });
+    } catch (err) {
+      console.error("DELETE REPORT ERROR:", err);
+      res.status(500).json({ message: "Server error deleting report" });
+    }
+  }
+);
+
+
+
+
+
 
 /* =========================
    ADMIN → GET ALL REPORTS
@@ -29,6 +80,72 @@ router.get(
     }
   }
 );
+
+/* =========================
+   LOAD REPORTS BY DEPARTMENT
+========================= */
+router.get(
+  "/department/:deptId",
+  auth,
+  permit("department_user", "admin"),
+  async (req, res) => {
+    try {
+      const reports = await Report.find({ department: req.params.deptId })
+        .populate("patient")
+        .sort({ createdAt: -1 });
+
+      res.json(reports);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+
+
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const report = await Report.findById(req.params.id)
+      .populate("patient")
+      .populate("department")
+      .populate("createdBy")
+      .populate("assignedTo");
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    res.json(report);
+  } catch (err) {
+    console.error("GET REPORT ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.put(
+  "/:id",
+  auth,
+  permit("department_user", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const report = await Report.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+
+      if (!report) return res.status(404).json({ message: "Report not found" });
+
+      res.json(report);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
 
 /* =========================
    CREATE REPORT (CASE BASED)
@@ -102,26 +219,6 @@ router.post(
 );
 
 
-/* =========================
-   LOAD REPORTS BY DEPARTMENT
-========================= */
-router.get(
-  "/department/:deptId",
-  auth,
-  permit("department_user", "admin"),
-  async (req, res) => {
-    try {
-      const reports = await Report.find({ department: req.params.deptId })
-        .populate("patient")
-        .sort({ createdAt: -1 });
-
-      res.json(reports);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
 
 /* =========================
    APPROVE REPORT (ADMIN)
@@ -151,46 +248,57 @@ router.post(
   }
 );
 
-// ===============================
-// GET SINGLE REPORT BY ID
-// ===============================
-router.get("/:id", auth, async (req, res) => {
-  try {
-    const report = await Report.findById(req.params.id)
-      .populate("patient")
-      .populate("department")
-      .populate("createdBy")
-      .populate("assignedTo");
 
-    if (!report) {
-      return res.status(404).json({ message: "Report not found" });
-    }
 
-    res.json(report);
-  } catch (err) {
-    console.error("GET REPORT ERROR:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-router.put(
-  "/:id",
+/* ============================================
+   CREATE EMPTY REPORT FOR A CASE (QUICK CREATE)
+=============================================== */
+/* ============================================
+   CREATE EMPTY REPORT FOR A CASE (QUICK CREATE)
+=============================================== */
+router.post(
+  "/create/:caseId",
   auth,
   permit("department_user", "admin", "super_admin"),
   async (req, res) => {
     try {
-      const report = await Report.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-      );
+      const { caseId } = req.params;
 
-      if (!report) return res.status(404).json({ message: "Report not found" });
+      // Check case exists
+      const caseData = await Case.findById(caseId);
+      if (!caseData) {
+        return res.status(404).json({ message: "Case not found" });
+      }
 
-      res.json(report);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
+      // Create empty report
+const newReport = await Report.create({
+  patient: caseData.patientId,   // ✅ FIXED
+  caseId: caseId,
+  department: caseData.department,
+  createdBy: req.user._id,
+  assignedTo: req.user._id,
+  findings: "",
+  impression: "",
+  conclusion: "",
+  notes: "",
+  status: "pending",
+  caseNumber: caseData.caseNumber,
+  createdAt: new Date(),
+});
+
+
+      // Save reportId back to case
+      caseData.reportId = newReport._id;
+      await caseData.save();
+
+      res.json({
+        success: true,
+        reportId: newReport._id,
+      });
+
+    } catch (error) {
+      console.error("CREATE EMPTY REPORT ERROR:", error);
+      res.status(500).json({ message: "Server error creating report" });
     }
   }
 );

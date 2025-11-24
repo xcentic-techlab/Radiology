@@ -46,7 +46,7 @@ export default function AdminWorkload() {
     return {
       reports: depReports.length,
       patients: patients.size,
-      assigned: assignedUsers.size,
+      // assigned: assignedUsers.size,
     };
   }
 
@@ -96,10 +96,10 @@ export default function AdminWorkload() {
                   <span className="font-semibold">{s.patients}</span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="text-gray-700">Assigned Users</span>
                   <span className="font-semibold">{s.assigned}</span>
-                </div>
+                </div> */}
               </div>
 
               {/* Footer Button */}
