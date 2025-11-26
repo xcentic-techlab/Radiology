@@ -20,6 +20,16 @@ const caseSchema = new mongoose.Schema(
       default: null 
     },
 
+    tests: [
+  {
+    testId: String,
+    name: String,
+    mrp: Number,
+    offerRate: Number,
+    code: String
+  }
+],
+
     procedure: { 
   type: String, 
 //   required: true 

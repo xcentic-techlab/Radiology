@@ -157,3 +157,15 @@ All colors MUST be HSL.
   scrollbar-width: none;     /* Firefox */
 }
 
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #c7d5ff;
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

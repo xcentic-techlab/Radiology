@@ -187,7 +187,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
              backdrop-blur-md shadow-lg shadow-blue-500/20 
              text-white font-semibold transition-all"
 >
-  Add User
+  Add Employee
 </Button>
 
         </div>

@@ -9,6 +9,7 @@ import { paymentsService } from "@/api/payments.service";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
+import axios from "axios";
 
 
 export default function AdminDashboard() {
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
 
   const [departments, setDepartments] = useState([]);
   const [revenueModal, setRevenueModal] = useState(false);
+const [deptReportCounts, setDeptReportCounts] = useState({});
 
   const [openDeptModal, setOpenDeptModal] = useState(false);
 
@@ -59,6 +61,9 @@ export default function AdminDashboard() {
       });
     }
   }
+
+
+
 
   async function loadDepartments() {
     try {
@@ -101,10 +106,43 @@ export default function AdminDashboard() {
   ];
 
 
+  async function loadDeptReportCounts() {
+  try {
+    const reports = await reportsService.getAllForAdmin();
+
+    // Group by department
+    const map = {};
+
+    reports.forEach(r => {
+      const deptId = r.department?._id;
+      if (!deptId) return;
+
+      if (!map[deptId]) map[deptId] = 0;
+      map[deptId]++;
+    });
+
+    return map;
+  } catch (err) {
+    console.log("Failed to count reports");
+    return {};
+  }
+}
+
+useEffect(() => {
+  loadStats();
+  loadDepartments();
+
+  loadDeptReportCounts().then(setDeptReportCounts);
+}, []);
+
+
+
+
   
 
   return (
     <DashboardLayout>
+
 
       {/* HEADER */}
       <div className="text-center space-y-2 mt-6">
@@ -167,20 +205,36 @@ export default function AdminDashboard() {
 
       <h2 className="text-xl font-bold text-gray-800">Department Reports</h2>
 
-      <div className="mt-4 space-y-3">
-        {departments.map((d) => (
-          <button
-            key={d._id}
-            onClick={() => {
-              setOpenDeptModal(false);
-              navigate(`/admin/reports?dept=${d._id}`);
-            }}
-            className="w-full text-left px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
-          >
-            {d.name}
-          </button>
-        ))}
-      </div>
+<div 
+  className="
+    mt-4 space-y-3 
+    max-h-64 overflow-y-auto pr-2 custom-scroll
+  "
+>
+  {departments.map((d) => (
+    <button
+      key={d._id}
+      onClick={() => {
+        setOpenDeptModal(false);
+        navigate(`/admin/reports?dept=${d._id}`);
+      }}
+      className="
+        w-full flex justify-between items-center 
+        px-4 py-2 rounded-lg border hover:bg-gray-100
+        transition text-sm font-medium
+      "
+    >
+      <span>{d.name}</span>
+
+      {/* Report Count Badge */}
+      <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
+        {deptReportCounts[d._id] || 0}
+      </span>
+    </button>
+  ))}
+</div>
+
+
 
       <div className="flex justify-end mt-5">
         <button

@@ -16,7 +16,7 @@ export async function register(req, res){
   if(existing) return res.status(400).json({ message: "Email exists" });
 
   const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
-  const user = new User({ name, email, phone, passwordHash, role, department });
+  const user = new User({ name, email, phone, passwordHash, role,  department: department || null });
   await user.save();
   res.status(201).json({ message: "User created", user: { id: user._id, name: user.name, role: user.role } });
 }
@@ -29,7 +29,20 @@ export async function login(req, res){
   const ok = await bcrypt.compare(password, user.passwordHash);
   if(!ok) return res.status(401).json({ message: "Invalid credentials" });
   const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-  res.json({ token, user: { id: user._id, name: user.name, role: user.role, department: user.department } });
+  res.json({
+  token,
+  user: {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    department: user.department ? {
+      _id: user.department._id,
+      name: user.department.name
+    } : null
+  }
+});
+
 }
 
 export async function me(req, res){

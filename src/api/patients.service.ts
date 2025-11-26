@@ -15,19 +15,32 @@ export interface Patient {
   status: string;
   assignedDepartment?: string;
   departmentAssignedTo?: string;
+
+selectedTests?: {
+  testId: number;
+  name: string;
+  mrp: number;
+  offerRate: number;
+  code: string;
+   deptid: number;
+}[];
+
+
   govtId?: {
     idType: string;
     idNumber: string;
     fileUrl?: string;
   };
+
   clinicalHistory?: string;
   previousInjury?: string;
   previousSurgery?: string;
   patientId?: string;
   referredDoctor?: string;
-  address?:string
-  createdAt?:string
+  address?: string;
+  createdAt?: string;
 }
+
 
 
 export const patientsService = {

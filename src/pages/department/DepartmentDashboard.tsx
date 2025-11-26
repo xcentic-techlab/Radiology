@@ -24,6 +24,10 @@ const DepartmentDashboard = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
+  const [pendingCount, setPendingCount] = useState(0);
+const [approvedCount, setApprovedCount] = useState(0);
+
+
   // popups
   const [openOverview, setOpenOverview] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
@@ -47,6 +51,23 @@ const DepartmentDashboard = () => {
     { label: "Pending Reports", value: "pending" },
     { label: "Approved Reports", value: "approved" },
   ];
+
+  useEffect(() => {
+  loadReportCounts();
+}, []);
+
+async function loadReportCounts() {
+  try {
+    const res = await fetch(`http://localhost:4000/api/reports/department/${user?.department?._id}`);
+    const data = await res.json();
+
+    setPendingCount(data.filter(r => r.status === "pending").length);
+    setApprovedCount(data.filter(r => r.status === "approved").length);
+  } catch (err) {
+    console.log("Failed to load report counts");
+  }
+}
+
 
   return (
     <DashboardLayout>
@@ -105,7 +126,7 @@ const DepartmentDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* QUICK CREATE CASE */}
+          {/* QUICK CREATE CASE */}s
           <Card
             onClick={() => navigate("/department/create-cases")}
             className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"

@@ -123,6 +123,7 @@ setNotes(data.notes || "");
         idType: p.govtId?.idType || "",
         idNumber: p.govtId?.idNumber || "",
         paymentStatus: p.paymentStatus || "",
+        selectedTests: p.selectedTests || []
       });
 
       setInitialLoadDone(true);  // mark as loaded
@@ -170,6 +171,8 @@ useEffect(() => {
           idType: patientForm.idType,
           idNumber: patientForm.idNumber,
         },
+
+        selectedTests: patientForm.selectedTests || []
       });
 
       toast({ title: "Success", description: "Patient updated" });
@@ -413,9 +416,49 @@ const saveProcedureDetails = async () => {
                 </div>
 
                 <div>
+  <Label>Test Name</Label>
+  <p>{report.patient.selectedTests?.[0]?.name || "-"}</p>
+</div>
+
+<div>
+  <Label>MRP</Label>
+  <p>₹{report.patient.selectedTests?.[0]?.mrp || "-"}</p>
+</div>
+
+<div>
+  <Label>Offer Rate</Label>
+  <p>₹{report.patient.selectedTests?.[0]?.offerRate || "-"}</p>
+</div>
+
+
+                <div>
                   <Label>Referred Doctor</Label>
                   <p>{patientForm.referredDoctor}</p>
                 </div>
+
+                {/* SELECTED TEST DETAILS */}
+<div className="col-span-3 border p-3 rounded-lg">
+  <Label>Selected Test</Label>
+
+  {report.patient.selectedTests && report.patient.selectedTests.length > 0 ? (
+    report.patient.selectedTests.map((t, i) => (
+      <div key={i} className="mt-2 p-2 bg-slate-50 rounded border">
+        <p className="font-medium">{t.name}</p>
+        <p className="text-sm text-muted-foreground">
+          Test ID: {t.testId} | Code: {t.code}
+        </p>
+        <p className="text-sm">
+          MRP: ₹{t.mrp} — Offer Rate: ₹{t.offerRate}
+        </p>
+      </div>
+    ))
+  ) : (
+    <p className="text-sm text-muted-foreground mt-2">
+      No test added
+    </p>
+  )}
+</div>
+
                 <div className="col-span-3 border p-3 rounded-lg">
   <Label>Government ID</Label>
 
@@ -579,6 +622,45 @@ const saveProcedureDetails = async () => {
                     })
                   }
                 />
+
+                <div className="col-span-3">
+  <Label>Selected Test</Label>
+
+  {report.patient.selectedTests?.map((t, i) => (
+    <div key={i} className="p-2 border rounded mt-2">
+      <InputField
+        label="Test Name"
+        value={t.name}
+        onChange={(e) => {
+          const copy = [...report.patient.selectedTests];
+          copy[i].name = e.target.value;
+          setReport({ ...report, patient: { ...report.patient, selectedTests: copy } });
+        }}
+      />
+
+      <InputField
+        label="MRP"
+        value={t.mrp}
+        onChange={(e) => {
+          const copy = [...report.patient.selectedTests];
+          copy[i].mrp = e.target.value;
+          setReport({ ...report, patient: { ...report.patient, selectedTests: copy } });
+        }}
+      />
+
+      <InputField
+        label="Offer Rate"
+        value={t.offerRate}
+        onChange={(e) => {
+          const copy = [...report.patient.selectedTests];
+          copy[i].offerRate = e.target.value;
+          setReport({ ...report, patient: { ...report.patient, selectedTests: copy } });
+        }}
+      />
+    </div>
+  ))}
+</div>
+
 
                 <Button
                   className="mt-4 col-span-3"

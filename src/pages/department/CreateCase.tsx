@@ -70,16 +70,24 @@ const CreateCase = () => {
 useEffect(() => {
   (async () => {
     try {
-      const deptId = user?.department?._id;
+      const deptId =
+        user?.department?._id ||
+        localStorage.getItem("departmentId");
 
-      // fetch data
+      console.log("🔥 Using Department ID:", deptId);
+
+      if (!deptId) {
+        console.log("❌ DEPT ID UNDEFINED — STOPPING");
+        return;
+      }
+
+      // fetch data with SAFE deptId
       const patientsData = await patientsService.getDepartmentPatientDetails(deptId);
       const usersData = await usersService.getAll();
-      const casesData = await casesService.getByDepartment(deptId); // ✅ correct API
+      const casesData = await casesService.getByDepartment(deptId);
 
       setCases(casesData);
 
-      // department filter
       const filtered = patientsData.filter(
         (p) =>
           p.departmentAssignedTo === deptId ||
@@ -88,16 +96,15 @@ useEffect(() => {
 
       setPatients(filtered);
 
-      // remove already-case patients
       const noCasePatients = filtered.filter(
-  (p) => !casesData.some((c) => {
-    const casePatientId =
-      typeof c.patientId === "string" ? c.patientId : c.patientId?._id;
+        (p) =>
+          !casesData.some((c) => {
+            const casePatientId =
+              typeof c.patientId === "string" ? c.patientId : c.patientId?._id;
 
-    return casePatientId === p._id;
-  })
-);
-
+            return casePatientId === p._id;
+          })
+      );
 
       setAvailablePatients(noCasePatients);
       setUsers(usersData);
@@ -114,6 +121,7 @@ useEffect(() => {
     }
   })();
 }, []);
+
 
 
 
@@ -257,6 +265,21 @@ return (
 
                   <Info label="Address" value={patientInfo.address} />
                   <Info label="Referred Doctor" value={patientInfo.referredDoctor} />
+                  <Info 
+  label="Test Name" 
+  value={patientInfo.selectedTests?.[0]?.name || "—"} 
+/>
+
+<Info 
+  label="MRP Price" 
+  value={patientInfo.selectedTests?.[0]?.mrp ? `₹${patientInfo.selectedTests[0].mrp}` : "—"} 
+/>
+
+<Info  
+  label="Offer Price" 
+  value={patientInfo.selectedTests?.[0]?.offerRate ? `₹${patientInfo.selectedTests[0].offerRate}` : "—"}  
+/>
+
 
                   {/* PAYMENT STATUS */}
                   <div>

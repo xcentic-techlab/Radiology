@@ -13,7 +13,6 @@ const departmentSchema = new mongoose.Schema(
     code: {
       type: String,
       required: true,
-      unique: true,
       uppercase: true,
       trim: true
     },
@@ -26,7 +25,10 @@ const departmentSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
-    }
+    },
+    
+    deptid: { type: Number, required: true },
+
   },
   { timestamps: true }
 );

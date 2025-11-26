@@ -15,6 +15,10 @@ import uploadRoutes from "./src/routes/upload.route.js";
 import { initSocket } from "./src/utils/socket.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import caseRoutes from "./src/routes/caseRoutes.js";
+import adminRoutes from "./src/routes/admin.route.js";
+import testRoutes from "./src/routes/testRoutes.js";
+import seedAdmin from "./src/seed/seedAdmin.js";
+
 
 
 dotenv.config();
@@ -47,6 +51,8 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/cases", caseRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/tests", testRoutes);
 
 
 // Error Handler
@@ -56,7 +62,10 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 4000;
 
 connectDB()
-  .then(() => {
+  .then(async() => {
+
+    await seedAdmin();
+
     const io = new IOServer(server, {
       cors: {
         origin: process.env.FRONTEND_URL || "*",

@@ -542,6 +542,9 @@ fetchPatients();
                   <TableHead>Payment</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Department</TableHead>
+                  <TableHead>Test Name</TableHead>
+                  <TableHead>MRP</TableHead>
+                  <TableHead>Offer</TableHead>
                   <TableHead>Govt ID</TableHead>
                   <TableHead>Delete</TableHead>
                 </TableRow>
@@ -583,39 +586,67 @@ fetchPatients();
                     </TableCell>
 
                     {/* Department */}
-                    <TableCell>
-                      {patient.assignedDepartment ? (
-                        <span className="text-blue-700 font-semibold">
-                          {patient.assignedDepartment}
-                        </span>
-                      ) : (
-                        <span className="text-red-600 font-semibold">Pending</span>
-                      )}
-                    </TableCell>
+<TableCell>
+  {patient.assignedDepartment ? (
+    <div className="text-blue-700 font-semibold flex flex-col">
+      <span>{patient.assignedDepartment}</span>
 
-                    {/* Govt ID */}
-                   <TableCell>
-  {patient.govtId?.fileUrl ? (
-    <div className="flex items-start gap-3">
-      <img
-        src={patient.govtId.fileUrl}
-        alt="Govt ID"
-        className="h-12 w-20 rounded border shadow cursor-pointer hover:scale-110 transition"
-        onClick={(e) => {
-          e.stopPropagation();
-          window.open(patient.govtId.fileUrl, "_blank");
-        }}
-      />
-
-      <div className="flex flex-col">
-        <span className="text-sm font-semibold">{patient.govtId.idType}</span>
-        <span className="text-xs text-gray-700">{patient.govtId.idNumber}</span>
-      </div>
     </div>
   ) : (
-    "-"
+    <span className="text-red-600 font-semibold">Pending</span>
   )}
 </TableCell>
+
+
+<TableCell>
+  {patient.selectedTests?.[0]
+    ? `${patient.selectedTests[0].name} (ID: ${patient.selectedTests[0].testId})`
+    : "-"}
+</TableCell>
+
+<TableCell>
+  ₹{patient.selectedTests?.[0]?.mrp || "-"}
+</TableCell>
+
+<TableCell>
+  ₹{patient.selectedTests?.[0]?.offerRate || "-"}
+</TableCell>
+
+
+                    {/* Govt ID */}
+<TableCell>
+  {patient.govtId ? (
+    <div className="flex items-start gap-3">
+
+      {/* If image exists → show image */}
+      {patient.govtId.fileUrl && (
+        <img
+          src={patient.govtId.fileUrl}
+          alt="Govt ID"
+          className="h-12 w-20 rounded border shadow cursor-pointer hover:scale-110 transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(patient.govtId.fileUrl, "_blank");
+          }}
+        />
+      )}
+
+      {/* Always show type + number (even when image missing) */}
+      <div className="flex flex-col">
+        <span className="text-sm font-semibold">
+          {patient.govtId.idType || "N/A"}
+        </span>
+        <span className="text-xs text-gray-700">
+          {patient.govtId.idNumber || "N/A"}
+        </span>
+      </div>
+
+    </div>
+  ) : (
+    "-"   // Govt ID hi stored nahi hai
+  )}
+</TableCell>
+
 
 
                     <TableCell>
@@ -717,6 +748,31 @@ fetchPatients();
           <p><b>ID Number:</b> {selectedPatient.govtId?.idNumber || "-"}</p>
         </div>
       </div>
+
+      {/* SELECTED TEST DETAILS */}
+<div>
+  <h3 className="font-semibold text-blue-800 mb-2">Selected Test</h3>
+
+  {selectedPatient.selectedTests && selectedPatient.selectedTests.length > 0 ? (
+    selectedPatient.selectedTests.map((t, index) => (
+      <div
+        key={index}
+      >
+        <p><b>Test Name:</b> {t.name}</p>
+        <p><b>Test ID:</b> {t.testId}</p>
+        <p><b>Code:</b> {t.code}</p>
+        <p>
+          <b>MRP:</b> ₹{t.mrp}  
+          &nbsp;&nbsp;
+          <b>Offer Rate:</b> ₹{t.offerRate}
+        </p>
+      </div>
+    ))
+  ) : (
+    <p className="text-sm text-muted-foreground">No test selected</p>
+  )}
+</div>
+
 
     </div>
   </div>

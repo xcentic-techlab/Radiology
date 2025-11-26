@@ -2,39 +2,41 @@ import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema(
   {
-    firstName: { type: String, },
-    lastName: { type: String, },
-
-    address: { type: String,},
+    firstName: String,
+    lastName: String,
+    address: String,
 
     contact: {
-      phone: { type: String, },
-      email: { type: String, },
+      phone: String,
+      email: String,
     },
 
-    age: { type: Number, },
-    gender: { type: String, },
-
-    caseDescription: { type: String, },
+    age: Number,
+    gender: String,
+    caseDescription: String,
 
     caseType: {
       type: String,
       enum: ["Urgent", "Emergency", "Routine", "STAT"],
-      require: true
+      required: true,
     },
 
     referredDoctor: String,
 
-    // AUTO Patient ID
     patientId: {
       type: String,
-      unique : true
+      unique: true,
     },
 
-    // Auto date like Mongo
     reportDate: {
       type: Date,
       default: Date.now,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
     },
 
     status: {
@@ -49,72 +51,61 @@ const patientSchema = new mongoose.Schema(
       default: "pending_payment",
     },
 
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid"],
-      default: "pending",
-    },
-
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
-    // IF using Department Model (Department collection)
-    departmentAssignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Department",
+    assignedDepartment: {
+      type: String,
+      set: (v) => v?.toLowerCase(),
+      default: null,
     },
 
-    // Store department name directly (MRI / CT etc.)
-assignedDepartment: {
-  type: String,
-  set: (v) => v?.toLowerCase(),
-  default: null,
+departmentAssignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Department",
+    default: null
 },
 
 
-
-    // Kisne assign kiya (Reception/Admin)
     departmentAssignedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
 
-    // Kab assign kiya
     departmentAssignedAt: Date,
 
-    clinicalHistory: { type: String },
-    previousInjury: { type: String },
-    previousSurgery: { type: String },
+    clinicalHistory: String,
+    previousInjury: String,
+    previousSurgery: String,
 
     attachments: [
       {
         fileName: String,
         fileUrl: String,
-        uploadedAt: { type: Date, default: Date.now }
-      }
+        uploadedAt: { type: Date, default: Date.now },
+      },
     ],
 
     govtId: {
-  type: {
-    idType: {
-      type: String,
-      enum: ["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"],
-      required: true
+      idType: String,
+      idNumber: String,
+      fileUrl: String,
     },
-    idNumber: {
-      type: String,
-      required: true
-    },
-    fileUrl: String   // PDF / Image link (optional)
-  },
-  required: true
-},
 
-
+    // 💥 YEH IMPORTANT HAI — TESTS YAHAN AAYENGE
+    selectedTests: [
+      {
+        testId: String,
+        name: String,
+        mrp: Number,
+        offerRate: Number,
+        code: String,
+        deptid: Number, 
+      },
+    ],
   },
   { timestamps: true }
 );
 
-// AUTO-GENERATE PATIENT ID
 patientSchema.pre("save", function (next) {
   if (!this.patientId) {
     this.patientId = "PT-" + Date.now();

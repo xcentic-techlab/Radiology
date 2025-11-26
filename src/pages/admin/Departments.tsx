@@ -17,9 +17,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import CreateDepartmentDialog from '@/components/dialogs/CreateDepartmentDialog';
 import {Trash2} from "lucide-react"
+import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+
 
 const Departments = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>([]);
@@ -123,6 +128,50 @@ const [deleteLoading, setDeleteLoading] = useState(false);
   }
 };
 
+  async function loadDepartments() {
+    try {
+      const res = await departmentsService.getAll();
+      setDepartments(res);
+    } catch (err) {
+      console.log("Failed to load departments");
+    }
+  } 
+
+async function handleExcelUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!["application/vnd.ms-excel", 
+       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"].includes(file.type)) {
+    return toast({
+      title: "Invalid File",
+      description: "Please upload a valid Excel file (.xls or .xlsx)",
+      variant: "destructive"
+    });
+  }
+
+  const form = new FormData();
+  form.append("file", file);
+
+  toast({ title: "Uploading...", description: "Please wait." });
+
+  try {
+    await axios.post("http://localhost:4000/api/admin/upload-excel", form);
+
+    toast({ title: "Success", description: "Excel uploaded successfully!" });
+
+    await fetchDepartments(); // Refresh automatically
+
+  } catch (err) {
+    toast({
+      title: "Upload failed",
+      description: "Something went wrong.",
+      variant: "destructive",
+    });
+  }
+}
+
+
 
   return (
     <DashboardLayout>
@@ -163,21 +212,54 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 )}
 
       <div className="space-y-6">
+{/* HEADER */}
+<div className="flex items-center justify-between flex-wrap gap-4">
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
-            <p className="text-muted-foreground">Manage hospital departments</p>
-          </div>
+  {/* LEFT TEXT */}
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
+    <p className="text-muted-foreground">Manage hospital departments</p>
+  </div>
 
-          <Button
-            onClick={() => setDialogOpen(true)}
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
-          >
-            Add Department
-          </Button>
-        </div>
+  {/* RIGHT SIDE (BUTTON + EXCEL CARD) */}
+  <div className="flex items-center gap-4 flex-wrap">
+
+    {/* ADD BUTTON */}
+    <Button
+      onClick={() => setDialogOpen(true)}
+      className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
+    >
+      Add Department
+    </Button>
+
+    {/* EXCEL UPLOAD CARD */}
+   <div className="p-3 border rounded-xl bg-white/60 backdrop-blur shadow-md w-[230px]">
+  <label
+    htmlFor="excel-upload"
+    className="
+      flex items-center justify-center
+      w-full h-12
+      border-2 border-dashed border-blue-400
+      rounded-lg cursor-pointer
+      bg-blue-50 hover:bg-blue-100
+      transition
+      text-sm font-medium text-blue-600
+    "
+  >
+    Upload Departments & Tests
+  </label>
+
+  <input
+    id="excel-upload"
+    type="file"
+    accept=".xlsx, .xls"
+    className="hidden"
+    onChange={handleExcelUpload}
+  />
+</div>
+
+  </div>
+</div>
 
         {/* GLASS CARD */}
         <Card className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl">
@@ -213,9 +295,10 @@ const [deleteLoading, setDeleteLoading] = useState(false);
             <Table>
               <TableHeader className="bg-white/50 backdrop-blur-lg rounded-lg">
                 <TableRow>
+                  <TableHead>Dept ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
-                  <TableHead>Description</TableHead>
+                  {/* <TableHead>Description</TableHead> */}
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
 
@@ -241,6 +324,11 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                       key={dept._id}
                       className="hover:bg-white/40 backdrop-blur transition rounded-lg"
                     >
+<TableCell className="text-xs text-gray-700">
+  {dept.deptid}
+</TableCell>
+
+
                       <TableCell className="font-medium">{dept.name}</TableCell>
 
                       <TableCell>
@@ -249,9 +337,9 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="max-w-xs truncate">
+                      {/* <TableCell className="max-w-xs truncate">
                         {dept.description || '-'}
-                      </TableCell>
+                      </TableCell> */}
 
                       <TableCell>
                         {dept.isActive ? (
@@ -267,6 +355,16 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 
 <TableCell className="text-right">
   <div className="flex justify-end items-center gap-3">
+
+    {/* VIEW TESTS BUTTON */}
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => navigate(`/admin/departments/${dept._id}/tests`)}
+      className="rounded-md"
+    >
+      View Tests
+    </Button>
 
     {/* TOGGLE ACTIVE */}
     <Button
@@ -292,6 +390,7 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 
   </div>
 </TableCell>
+
 
 
                     </TableRow>

@@ -11,6 +11,7 @@ export interface DepartmentPayload {
 export interface Department {
   _id: string;
   name: string;
+   deptid: number; 
   code: string;
   description?: string;
   isActive: boolean;

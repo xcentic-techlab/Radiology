@@ -3,7 +3,22 @@ import Patient from "../models/Patient.js";
 export async function createPatient(req, res) {
   try {
     const data = req.body;
+
     data.createdBy = req.user._id;
+
+    // 🟩 TESTS FIX — ensure selectedTests is always an array
+    if (data.selectedTests && Array.isArray(data.selectedTests)) {
+      data.selectedTests = data.selectedTests.map(t => ({
+        testId: t.testId,
+        name: t.name,
+        mrp: t.mrp,
+        offerRate: t.offerRate,
+        code: t.code,
+        deptid: t.deptid
+      }));
+    } else {
+      data.selectedTests = [];
+    }
 
     const patient = new Patient(data);
     await patient.save();
@@ -14,6 +29,7 @@ export async function createPatient(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
 
 export async function getPatient(req, res) {
   try {

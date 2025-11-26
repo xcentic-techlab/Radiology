@@ -26,6 +26,7 @@ import { patientsService } from "@/api/patients.service";
 import { uploadService } from "@/api/upload.service";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import axios from "axios";
 
 /* --------------------------------------------------- */
 /* 🛑 ZOD VALIDATION                                   */
@@ -48,6 +49,11 @@ const schema = z.object({
 
   assignedDepartment: z.string().min(1, "Department is required"),
 
+    selectedTest: z.string({
+  required_error: "Please select a test",
+}),
+
+
   /* Optional fields — untouched */
   email: z.string().email().optional(),
   referredDoctor: z.string().optional(),
@@ -68,6 +74,7 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   const [govtFile, setGovtFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [departments, setDepartments] = useState([]);
+  const [tests, setTests] = useState([]);
 
   
   useEffect(() => {
@@ -100,18 +107,23 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
     });
   };
 
+  const loadTests = async (deptName) => {
+ const res = await axios.get(`http://localhost:4000/api/tests/by-dept-name/${deptName.toLowerCase()}`);
+console.log("TESTS RESPONSE:", res.data);
+
+  setTests(res.data);
+};
+
 
 
   /* --------------------------------------------------- */
   /*  FORM SUBMIT                                       */
   /* --------------------------------------------------- */
-const submit = async (data: any) => {
-  console.log("🔥 FORM DATA RECEIVED:", data);
-
+const submit = async (data) => {
   setLoading(true);
 
   try {
-    const payload = {
+    let payload:any = {
       firstName: data.firstName,
       lastName: data.lastName,
       age: data.age,
@@ -129,7 +141,6 @@ const submit = async (data: any) => {
 
       assignedDepartment: data.assignedDepartment.trim().toLowerCase(),
 
-      // Govt ID optional (only included if any value exists)
       govtId:
         data.govtIdType || data.govtIdNumber || fileUrl
           ? {
@@ -140,6 +151,33 @@ const submit = async (data: any) => {
           : null,
     };
 
+    // ⭐ Parse and add selected test
+    const selectedTestParsed = data.selectedTest
+      ? JSON.parse(data.selectedTest)
+      : null;
+
+    payload.selectedTests = [
+      {
+        testId: selectedTestParsed.itemid,
+        name: selectedTestParsed.name,
+        mrp: selectedTestParsed.price,
+        offerRate: selectedTestParsed.offerRate,
+        code: selectedTestParsed.code,
+        deptid: selectedTestParsed.deptid, 
+      },
+    ];
+
+    // ADD THIS FIX
+payload.departmentAssignedTo = departments.find(
+  d => d.name.trim().toLowerCase() === data.assignedDepartment.trim().toLowerCase()
+)?._id || null;
+
+console.log("PAYLOAD SENT =", payload);
+
+
+    // 👉👉 YAHAN PRINT KARO
+    console.log("PAYLOAD SENT =", payload);
+
     await patientsService.create(payload);
 
     toast({
@@ -148,7 +186,6 @@ const submit = async (data: any) => {
     });
 
     onSuccess();
-
   } catch (e) {
     toast({
       title: "Error",
@@ -159,6 +196,8 @@ const submit = async (data: any) => {
     setLoading(false);
   }
 };
+
+
   // console.log("FORM DATA =>", data);
 
 
@@ -170,24 +209,27 @@ const submit = async (data: any) => {
     max-h-[92vh]
     overflow-y-scroll scrollbar-hide
     rounded-2xl bg-white shadow-xl
-    p-3
+    pt-2 px-6 pb-6      /* ⭐ very low top padding */
   "
 >
-<DialogHeader className="text-center flex flex-col items-center gap-1 mb-1">
-  <DialogTitle className="text-xl font-bold text-center">
+
+
+<DialogHeader className="text-center flex flex-col items-center gap-1 mt-0 mb-1">
+  <DialogTitle className="text-xl font-bold text-center leading-tight">
     Register Patient
   </DialogTitle>
-
-  <DialogDescription className="text-xs text-center">
-    Enter patient details below
-  </DialogDescription>
 </DialogHeader>
 
 
 
 <form 
   onSubmit={handleSubmit(submit)} 
-  className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
+  className="
+    grid grid-cols-1 md:grid-cols-2
+    gap-2             /* ⭐ Larger spacing between fields */
+    text-sm
+    w-full
+  "
 >
 
 
@@ -248,24 +290,72 @@ const submit = async (data: any) => {
       </div>
 
       {/* DEPARTMENT */}
-      <div>
-        <Label>Assigned Department*</Label>
-        <Select onValueChange={(v) => setValue("assignedDepartment", v)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Department" />
-          </SelectTrigger>
-          <SelectContent>
-            {departments.map((dep) => (
-              <SelectItem key={dep._id} value={dep.name}>
-                {dep.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.assignedDepartment && (
-          <p className="text-xs text-red-500">{errors.assignedDepartment.message.toString()}</p>
-        )}
-      </div>
+      {/* DEPARTMENT - LEFT SIDE */}
+<div className="col-span-1 space-y-1">
+  <Label>Assigned Department*</Label>
+
+  <Select
+    onValueChange={(v) => {
+      setValue("assignedDepartment", v);
+      loadTests(v);
+    }}
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select Department" />
+    </SelectTrigger>
+
+    <SelectContent>
+      {departments.map((dep) => (
+        <SelectItem key={dep._id} value={dep.name}>
+          {dep.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+
+  {errors.assignedDepartment && (
+    <p className="text-xs text-red-500">
+      {errors.assignedDepartment.message.toString()}
+    </p>
+  )}
+</div>
+
+{/* TEST - RIGHT SIDE */}
+{Array.isArray(tests) && tests.length > 0 && (
+  <div className="col-span-1 space-y-1">
+    <Label>Select Test*</Label>
+
+    <Select
+      {...register("selectedTest")}
+      onValueChange={(v) =>
+        setValue("selectedTest", v, { shouldValidate: true })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select Test" />
+      </SelectTrigger>
+
+      <SelectContent>
+        {tests.map((t) => (
+          <SelectItem key={t._id} value={JSON.stringify(t)}>
+            {t.itemid} — {t.name} — ₹{t.offerRate}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+
+    {errors.selectedTest && (
+      <p className="text-xs text-red-500">
+        {errors.selectedTest.message.toString()}
+      </p>
+    )}
+  </div>
+)}
+
+
+
+
+      
 
       {/* Govt ID TYPE + NUMBER */}
       <div className="grid grid-cols-2 gap-4">
@@ -297,12 +387,29 @@ const submit = async (data: any) => {
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={isLoading} className="bg-blue-600 text-white">
-          Register
-        </Button>
-      </div>
+<div className="flex justify-between items-center col-span-2 pt-2">
+  
+  {/* LEFT SIDE BUTTON */}
+  <Button
+    type="button"
+    variant="outline"
+    onClick={onClose}
+    className="px-6"
+  >
+    Cancel
+  </Button>
+
+  {/* RIGHT SIDE BUTTON */}
+  <Button
+    type="submit"
+    disabled={isLoading}
+    className="bg-blue-600 text-white px-6"
+  >
+    Register
+  </Button>
+
+</div>
+
 
     </form>
   </DialogContent>

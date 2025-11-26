@@ -35,6 +35,13 @@ router.delete(
   }
 );
 
+router.get("/:id", async (req, res) => {
+  const dep = await Department.findById(req.params.id);
+  if (!dep) return res.status(404).json({ message: "Not found" });
+  res.json(dep);
+});
+
+
 
 router.get("/", auth, listDepartments);
 router.post("/", auth, permit("super_admin", "admin"), createDepartment);
@@ -46,6 +53,12 @@ router.delete("/:id", auth, permit("super_admin", "admin"), deleteDepartment);
  **********************************/
 router.get("/:deptId/patients", auth, async (req, res) => {
   try {
+    
+    // 🛑 FIX — Agar deptId undefined hai → empty array return karo
+    if (!req.params.deptId || req.params.deptId === "undefined") {
+      return res.json([]);
+    }
+
     const patients = await Patient.find({
       departmentAssignedTo: req.params.deptId,
       status: { $in: ["sent_to_department", "in_progress"] }
@@ -60,6 +73,7 @@ router.get("/:deptId/patients", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /**********************************
  *  GET FULL DETAILS OF A PATIENT

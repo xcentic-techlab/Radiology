@@ -8,6 +8,7 @@ import RoleGuard from "@/components/auth/RoleGuard";
 import { useAuthStore } from "@/store/authStore";
 import ReportsList from "./pages/department/ReportsList"
 import CreateCase from "./pages/department/CreateCase"
+import DepartmentTests from "../src/pages/department/DepartmentTests"
 /* ===================== AUTH ===================== */
 import Login from "@/pages/Login";
 
@@ -146,6 +147,9 @@ const App = () => (
     </ProtectedRoute>
   }
 />
+
+<Route path="/admin/departments/:id/tests" element={<DepartmentTests />} />
+
 
 {/* Replace existing admin reports route or add another path */}
 <Route
