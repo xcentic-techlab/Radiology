@@ -408,7 +408,7 @@ fetchPatients();
 
 
   return (
-  <DashboardLayout>
+  <>
     <div className="space-y-6">
 
       {/* HEADER */}
@@ -830,7 +830,7 @@ fetchPatients();
   </DialogContent>
 </Dialog>
 
-  </DashboardLayout>
+  </>
 );
 
 };

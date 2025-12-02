@@ -152,7 +152,7 @@ const fetchReports = async () => {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         
         {/* HEADER */}
@@ -269,6 +269,6 @@ const fetchReports = async () => {
           </Table>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

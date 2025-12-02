@@ -121,7 +121,7 @@ const statCards = [
 
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-8">
         
         {/* HEADER */}
@@ -318,7 +318,7 @@ const statCards = [
         }}
       />
 
-    </DashboardLayout>
+    </>
   );
 };
 

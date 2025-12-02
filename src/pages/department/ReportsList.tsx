@@ -63,7 +63,7 @@ const ReportsList = () => {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-bold">{title}</CardTitle>
@@ -127,7 +127,7 @@ const ReportsList = () => {
           )}
         </CardContent>
       </Card>
-    </DashboardLayout>
+    </>
   );
 };
 

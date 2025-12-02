@@ -6,14 +6,20 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useAuthStore();
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuthStore();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (loading)
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
 
-  return <>{children}</>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  return children;
 };
+
 
 export default ProtectedRoute;

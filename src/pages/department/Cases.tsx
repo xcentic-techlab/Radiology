@@ -194,7 +194,7 @@ const handleDelete = async () => {
 
 
   return (
-    <DashboardLayout>
+    <>
 
       
       {deleteTarget && (
@@ -443,7 +443,7 @@ const handleDelete = async () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

@@ -115,7 +115,7 @@ async function handleDelete() {
 
 
   return (
-    <DashboardLayout>
+    <>
 
       {deleteTarget && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -285,6 +285,6 @@ async function handleDelete() {
 
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

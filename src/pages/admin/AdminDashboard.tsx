@@ -141,7 +141,7 @@ useEffect(() => {
   
 
   return (
-    <DashboardLayout>
+    <>
 
 
       {/* HEADER */}
@@ -305,6 +305,6 @@ useEffect(() => {
 )}
 
 
-    </DashboardLayout>
+    </>
   );
 }

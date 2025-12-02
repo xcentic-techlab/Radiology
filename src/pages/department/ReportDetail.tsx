@@ -323,9 +323,9 @@ const saveProcedureDetails = async () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <>
         <div className="flex justify-center items-center h-64">Loading...</div>
-      </DashboardLayout>
+      </>
     );
   }
 
@@ -339,7 +339,7 @@ const saveProcedureDetails = async () => {
   
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         {/* HEADER */}
         <div className="flex items-center gap-4">
@@ -420,15 +420,15 @@ const saveProcedureDetails = async () => {
   <p>{report.patient.selectedTests?.[0]?.name || "-"}</p>
 </div>
 
-<div>
+{/* <div>
   <Label>MRP</Label>
   <p>₹{report.patient.selectedTests?.[0]?.mrp || "-"}</p>
-</div>
+</div> */}
 
-<div>
+{/* <div>
   <Label>Offer Rate</Label>
   <p>₹{report.patient.selectedTests?.[0]?.offerRate || "-"}</p>
-</div>
+</div> */}
 
 
                 <div>
@@ -447,9 +447,9 @@ const saveProcedureDetails = async () => {
         <p className="text-sm text-muted-foreground">
           Test ID: {t.testId} | Code: {t.code}
         </p>
-        <p className="text-sm">
+        {/* <p className="text-sm">
           MRP: ₹{t.mrp} — Offer Rate: ₹{t.offerRate}
-        </p>
+        </p> */}
       </div>
     ))
   ) : (
@@ -841,7 +841,7 @@ const saveProcedureDetails = async () => {
 
 
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

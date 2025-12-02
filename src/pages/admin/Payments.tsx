@@ -111,7 +111,7 @@ const [searchParams] = useSearchParams();
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         
         {/* PAGE TITLE */}
@@ -247,7 +247,7 @@ const [searchParams] = useSearchParams();
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

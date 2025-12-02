@@ -169,3 +169,28 @@ All colors MUST be HSL.
 .custom-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
+@keyframes scanLine {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-scanLine {
+  animation: scanLine 4s linear infinite;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 0.6; }
+  100% { transform: translateY(-40px); opacity: 0; }
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-slower {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+

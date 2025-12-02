@@ -83,7 +83,7 @@ navigate(`/department/report/${report._id}`);
   if (!caseData) return <p>Loading...</p>;
 
   return (
-  <DashboardLayout>
+  <>
     <div className="max-w-3xl mx-auto space-y-10">
 
       {/* PAGE TITLE */}
@@ -204,7 +204,7 @@ navigate(`/department/report/${report._id}`);
         </CardContent>
       </Card>
     </div>
-  </DashboardLayout>
+  </>
 );
 
 };

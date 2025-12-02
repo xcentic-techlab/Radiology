@@ -28,7 +28,7 @@ export default function DepartmentTests() {
   }
 
 return (
-  <DashboardLayout>
+  <>
     <div className="p-6 space-y-6">
 
       {/* PAGE TITLE */}
@@ -90,7 +90,7 @@ return (
       </div>
 
     </div>
-  </DashboardLayout>
+  </>
 );
 
 }

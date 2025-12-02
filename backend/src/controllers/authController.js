@@ -45,6 +45,30 @@ export async function login(req, res){
 
 }
 
-export async function me(req, res){
-  res.json({ user: req.user });
+export async function me(req, res) {
+  try {
+    const user = await User.findById(req.user.id).populate("department");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department
+          ? {
+              _id: user.department._id,
+              name: user.department.name,
+            }
+          : null,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 }
+

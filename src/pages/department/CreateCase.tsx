@@ -194,7 +194,7 @@ useEffect(() => {
   };
 
 return (
-  <DashboardLayout>
+  <>
     <div className="max-w-3xl mx-auto space-y-10">
 
       {/* PAGE TITLE */}
@@ -270,7 +270,7 @@ return (
   value={patientInfo.selectedTests?.[0]?.name || "—"} 
 />
 
-<Info 
+{/* <Info 
   label="MRP Price" 
   value={patientInfo.selectedTests?.[0]?.mrp ? `₹${patientInfo.selectedTests[0].mrp}` : "—"} 
 />
@@ -278,7 +278,7 @@ return (
 <Info  
   label="Offer Price" 
   value={patientInfo.selectedTests?.[0]?.offerRate ? `₹${patientInfo.selectedTests[0].offerRate}` : "—"}  
-/>
+/> */}
 
 
                   {/* PAYMENT STATUS */}
@@ -333,7 +333,7 @@ return (
       </Card>
 
     </div>
-  </DashboardLayout>
+  </>
 );
 
 };

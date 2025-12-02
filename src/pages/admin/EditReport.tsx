@@ -29,10 +29,10 @@ export default function EditReport() {
     alert("Updated");
   }
 
-  if (!report) return <DashboardLayout>Loading...</DashboardLayout>;
+  if (!report) return <>Loading...</>;
 
   return (
-    <DashboardLayout>
+    <>
       <h1 className="text-2xl font-bold">Edit Report</h1>
 
       <div className="space-y-4 max-w-xl mt-6">
@@ -41,6 +41,6 @@ export default function EditReport() {
 
         <Button onClick={save}>Save</Button>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

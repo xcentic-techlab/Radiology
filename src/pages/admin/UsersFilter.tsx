@@ -126,7 +126,7 @@ export default function UsersFilter() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
 
         {/* PAGE HEADER */}
@@ -294,6 +294,6 @@ export default function UsersFilter() {
 
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

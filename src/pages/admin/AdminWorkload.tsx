@@ -51,7 +51,7 @@ export default function AdminWorkload() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       {/* HEADER */}
       <div className="text-center mb-8 space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Department Workload</h1>
@@ -115,6 +115,6 @@ export default function AdminWorkload() {
           );
         })}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

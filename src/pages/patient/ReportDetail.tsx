@@ -36,12 +36,12 @@ const PatientReportDetail = () => {
     }
   };  
 
-  if (loading) return <DashboardLayout>Loading...</DashboardLayout>;
+  if (loading) return <>Loading...</>;
   if (!report)
-    return <DashboardLayout>❌ Report Not Found</DashboardLayout>;
+    return <>❌ Report Not Found</>;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/patient/reports")}>
           <ArrowLeft className="h-5 w-5" />
@@ -103,7 +103,7 @@ const PatientReportDetail = () => {
           </Card>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

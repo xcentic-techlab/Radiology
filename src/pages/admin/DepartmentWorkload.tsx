@@ -83,7 +83,7 @@ export default function DepartmentWorkload() {
       : "bg-gray-200 text-gray-700 border border-gray-300";
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
 
         {/* HEADER */}
@@ -191,6 +191,6 @@ export default function DepartmentWorkload() {
           </Table>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

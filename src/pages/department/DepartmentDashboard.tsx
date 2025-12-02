@@ -70,7 +70,7 @@ async function loadReportCounts() {
 
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-10">
 
         {/* HEADER */}
@@ -126,7 +126,7 @@ async function loadReportCounts() {
             </CardContent>
           </Card>
 
-          {/* QUICK CREATE CASE */}s
+          {/* QUICK CREATE CASE */}
           <Card
             onClick={() => navigate("/department/create-cases")}
             className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
@@ -211,7 +211,7 @@ async function loadReportCounts() {
         </Dialog>
 
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

@@ -62,14 +62,23 @@ const Sidebar = () => {
       text-white shadow-2xl"
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-xl font-bold tracking-wide">Radiology Portal</h1>
-            <p className="text-xs text-gray-300">Radiology System</p>
-          </div>
-        </div>
-      </div>
+{/* Logo Section */}
+<div className="p-6 border-b border-white/10 flex flex-col items-center text-center">
+
+  <img
+    src="/images/starradiology_logo-1.png"
+    alt="Star Radiology Logo"
+    className="h-14 w-auto object-contain mb-3"
+  />
+
+  <h1 className="text-lg font-semibold tracking-wide">Star Radiology</h1>
+
+  <p className="text-xs text-blue-200 mt-1">
+    Quality You Can Trust
+  </p>
+
+</div>
+
 
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">
