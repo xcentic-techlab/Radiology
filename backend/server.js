@@ -54,6 +54,14 @@ app.use("/api/cases", caseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/tests", testRoutes);
 
+router.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Radiology Backend is Running Successfully 🚀",
+    timestamp: new Date(),
+  });
+});
+
 
 // Error Handler
 app.use(errorHandler);
