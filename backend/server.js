@@ -29,10 +29,12 @@ const server = http.createServer(app);
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://159.65.144.159", "http://localhost:5173"],
   credentials: true,
 }));
+
 
 
 // static upload folder
@@ -54,10 +56,10 @@ app.use("/api/cases", caseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/tests", testRoutes);
 
-router.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.json({
     status: "OK",
-    message: "Radiology Backend is Running Successfully 🚀",
+    message: "Radiology Backend is Running Successfully",
     timestamp: new Date(),
   });
 });

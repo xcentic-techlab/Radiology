@@ -20,10 +20,10 @@ export default function DepartmentTests() {
   async function load() {
     console.log("FETCH CALLED"); // check only once
 
-    const dept = await axios.get(`http://localhost:4000/api/departments/${id}`);
+    const dept = await axios.get(`${import.meta.env.VITE_API_URL}/api/departments/${id}`);
     setDepartment(dept.data);
 
-    const res = await axios.get(`http://localhost:4000/api/tests/department/${id}`);
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tests/department/${id}`);
     setTests(res.data);
   }
 

@@ -108,7 +108,7 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   };
 
   const loadTests = async (deptName) => {
- const res = await axios.get(`http://localhost:4000/api/tests/by-dept-name/${deptName.toLowerCase()}`);
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tests/by-dept-name/${deptName.toLowerCase()}`);
 console.log("TESTS RESPONSE:", res.data);
 
   setTests(res.data);

@@ -58,7 +58,7 @@ const [approvedCount, setApprovedCount] = useState(0);
 
 async function loadReportCounts() {
   try {
-    const res = await fetch(`http://localhost:4000/api/reports/department/${user?.department?._id}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reports/department/${user?.department?._id}`);
     const data = await res.json();
 
     setPendingCount(data.filter(r => r.status === "pending").length);

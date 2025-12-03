@@ -156,7 +156,7 @@ async function handleExcelUpload(e) {
   toast({ title: "Uploading...", description: "Please wait." });
 
   try {
-    await axios.post("http://localhost:4000/api/admin/upload-excel", form);
+    await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/upload-excel`, form);
 
     toast({ title: "Success", description: "Excel uploaded successfully!" });
 
