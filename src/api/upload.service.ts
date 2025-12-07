@@ -6,7 +6,7 @@ export const uploadService = {
     fd.append("file", file);
     fd.append("folder", "govt-ids");
 
-    const res = await axios.post("/api/upload/govt-id", fd, {
+    const res = await axios.post("/upload/govt-id", fd, {
       headers: { "Content-Type": "multipart/form-data" }
     });
 

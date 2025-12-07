@@ -46,45 +46,45 @@ selectedTests?: {
 export const patientsService = {
   // 🟢 Already hoga
   list: async () => {
-    const res = await api.get("/api/patients");
+    const res = await api.get("/patients");
     return res.data;
   },
 
   getById: async (id: string) => {
-    const res = await api.get(`/api/patients/${id}`);
+    const res = await api.get(`/patients/${id}`);
     return res.data;
   },
 
   // 🆕 YEH NAYA FUNCTION ADD KARO
   update: async (id: string, data: any) => {
-    const res = await api.put(`/api/patients/${id}`, data);
+    const res = await api.put(`/patients/${id}`, data);
     return res.data;
   },
   
   create: async (data: any) => {
-    const res = await api.post("/api/patients", data);
+    const res = await api.post("/patients", data);
     return res.data;
   },
   updatePayment: async (id:string) => {
-    return api.post(`/api/patients/${id}/payment`);
+    return api.post(`/patients/${id}/payment`);
   },
 
 assignDepartment: async (id, data) => {
-  return api.post(`/api/patients/${id}/assign-department`, data);
+  return api.post(`/patients/${id}/assign-department`, data);
 },
 
 getDepartmentPatientDetails: async (patientId: string) => {
-  const res = await api.get(`/api/departments/${patientId}/patients`);
+  const res = await api.get(`/departments/${patientId}/patients`);
   return res.data;
 },
 
 updateHistory: async (patientId: string, data: any) => {
-  const res = await api.put(`/api/departments/${patientId}/update-history`, data);
+  const res = await api.put(`/departments/${patientId}/update-history`, data);
   return res.data;
 },
 
   getByDepartment: async (deptId: string) => {
-  const res = await api.get(`/api/patients/department/${deptId}`);
+  const res = await api.get(`/patients/department/${deptId}`);
   return res.data;
 },
 
@@ -92,7 +92,7 @@ uploadGovtId: async (id: string, file: File) => {
   const form = new FormData();
   form.append("file", file);
 
-  const res = await api.post(`/api/patients/${id}/upload-govt-id`, form, {
+  const res = await api.post(`/patients/${id}/upload-govt-id`, form, {
     headers: { "Content-Type": "multipart/form-data" }
   });
   
@@ -100,7 +100,7 @@ uploadGovtId: async (id: string, file: File) => {
 },
 
 delete: async (id: string) => {
-  const res = await api.delete(`/api/patients/${id}`);
+  const res = await api.delete(`/patients/${id}`);
   return res.data;
 },
 

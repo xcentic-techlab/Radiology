@@ -19,7 +19,7 @@ export interface Department {
 
 export const departmentsService = {
   getAll: async () => {
-    const res = await api.get("/api/departments");
+    const res = await api.get("/departments");
 
     if (Array.isArray(res.data)) return res.data;
     if (Array.isArray(res.data.departments)) return res.data.departments;
@@ -28,17 +28,17 @@ export const departmentsService = {
   },
 
   create: async (data: DepartmentPayload) => {
-    const res = await api.post("/api/departments", data);
+    const res = await api.post("/departments", data);
     return res.data;
   },
 
   update: async (id: string, data: Partial<DepartmentPayload>) => {
-    const res = await api.put(`/api/departments/${id}`, data);
+    const res = await api.put(`/departments/${id}`, data);
     return res.data;
   },
 
   delete: async (id: string) => {
-  const res = await api.delete(`/api/departments/${id}`);
+  const res = await api.delete(`/departments/${id}`);
   return res.data;
 }
 

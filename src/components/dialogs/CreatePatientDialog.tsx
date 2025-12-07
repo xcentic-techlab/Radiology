@@ -26,7 +26,8 @@ import { patientsService } from "@/api/patients.service";
 import { uploadService } from "@/api/upload.service";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import axios from "axios";
+import axiosAPI from "@/api/axios";
+
 
 /* --------------------------------------------------- */
 /* 🛑 ZOD VALIDATION                                   */
@@ -108,7 +109,9 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   };
 
   const loadTests = async (deptName) => {
- const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tests/by-dept-name/${deptName.toLowerCase()}`);
+//  const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tests/by-dept-name/${deptName.toLowerCase()}`);
+const res = await axiosAPI.get(`/tests/by-dept-name/${deptName.toLowerCase()}`);
+
 console.log("TESTS RESPONSE:", res.data);
 
   setTests(res.data);
