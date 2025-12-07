@@ -4,7 +4,7 @@ import { Server as IOServer } from "socket.io";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./src/config/db.js";
-
+import mongoose from "mongoose";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import departmentRoutes from "./src/routes/departmentRoutes.js";
@@ -18,6 +18,9 @@ import caseRoutes from "./src/routes/caseRoutes.js";
 import adminRoutes from "./src/routes/admin.route.js";
 import testRoutes from "./src/routes/testRoutes.js";
 import seedAdmin from "./src/seed/seedAdmin.js";
+import mobileAuthRoutes from "./src/routes/mobileAuth.js";
+import mobileAppointments from "./src/routes/mobileAppointments.js";
+import mobileReports from "./src/routes/mobileReports.js";
 
 
 
@@ -31,7 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: ["http://159.65.144.159", "http://localhost:5173"],
+  origin: ["http://159.65.144.159", "http://localhost:5173", "https://radiology-gamma.vercel.app"],
   credentials: true,
 }));
 
@@ -56,6 +59,12 @@ app.use("/api/cases", caseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/tests", testRoutes);
 
+
+app.use("/mobile/auth", mobileAuthRoutes);
+app.use("/mobile/appointments", mobileAppointments);
+app.use("/mobile/reports", mobileReports);
+
+
 app.get("/", (req, res) => {
   res.json({
     status: "OK",
@@ -63,6 +72,7 @@ app.get("/", (req, res) => {
     timestamp: new Date(),
   });
 });
+
 
 
 // Error Handler

@@ -170,6 +170,7 @@ router.post(
   impression: req.body.impression,
   conclusion: req.body.conclusion,
   notes: req.body.notes,
+  phone: phone,
 });
 
       await report.save();
@@ -200,9 +201,15 @@ router.post(
       const report = await Report.findById(reportId);
       if (!report) return res.status(404).json({ message: "Report not found" });
 
+      console.log("DEBUG FILE:", req.file);
+
+      // ⭐ If the file already uploaded by multer-storage-cloudinary
+      //    and path is a Cloudinary URL → USE IT DIRECTLY
+      const cloudURL = req.file.path;  // ⭐ Already hosted PDF URL
+
       report.reportFile = {
-        url: req.file.path,          // MUST BE CLOUDINARY URL
-        public_id: req.file.filename,
+        url: cloudURL,
+        public_id: req.file.filename,  // cloudinary public_id
         filename: req.file.originalname,
         uploadedBy: req.user._id,
         uploadedAt: new Date(),
@@ -217,6 +224,7 @@ router.post(
     }
   }
 );
+
 
 
 
@@ -270,6 +278,11 @@ router.post(
         return res.status(404).json({ message: "Case not found" });
       }
 
+      // Get patient phone
+      const patientData = await Patient.findById(caseData.patientId);
+      const phone = patientData?.contact?.phone || null;   // ⭐ IMPORTANT ⭐
+
+
       // Create empty report
 const newReport = await Report.create({
   patient: caseData.patientId,   // ✅ FIXED
@@ -283,6 +296,7 @@ const newReport = await Report.create({
   notes: "",
   status: "pending",
   caseNumber: caseData.caseNumber,
+  phone: phone, 
   createdAt: new Date(),
 });
 

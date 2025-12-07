@@ -31,6 +31,9 @@ const reportSchema = new mongoose.Schema(
     conclusion: String,
     notes: String,
 
+    phone: { type: String },
+
+
     // CLOUDINARY FILE STORE
     reportFile: {
       url: String,
