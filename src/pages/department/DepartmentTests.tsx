@@ -18,7 +18,6 @@ export default function DepartmentTests() {
   }, []);
 
   async function load() {
-    console.log("FETCH CALLED"); // check only once
 
     // const dept = await axios.get(`${import.meta.env.VITE_API_URL}/api/departments/${id}`);
     const dept = await axios.get(`/departments/${id}`);
@@ -33,7 +32,6 @@ return (
   <>
     <div className="p-6 space-y-6">
 
-      {/* PAGE TITLE */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
           Tests under: <span className="text-blue-600">{department?.name}</span>
@@ -42,8 +40,6 @@ return (
           List of all tests associated with this department
         </p>
       </div>
-
-      {/* GLASS CARD */}
       <div className="
         rounded-2xl 
         bg-white/60 
@@ -52,8 +48,6 @@ return (
         shadow-xl 
         p-6
       ">
-        
-        {/* TABLE WRAPPER FOR SCROLL */}
         <div className="overflow-x-auto rounded-xl border shadow-sm">
 
           <table className="w-full border-collapse">

@@ -63,8 +63,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [current, setCurrent] = useState(0);
-
-  // Auto Slider
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
@@ -112,9 +110,6 @@ export default function Login() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
-
-      {/* LEFT SIDE FULL SLIDER */}
-{/* LEFT SIDE FULL SLIDER */}
 <div className="hidden md:block relative overflow-hidden">
 
   <AnimatePresence mode="wait">
@@ -127,18 +122,11 @@ export default function Login() {
       className={`absolute inset-0 p-10 bg-gradient-to-br ${slides[current].bg} text-white rounded-none`}
     >
 
-      {/* NEW DECORATION PACK (Premium UI) */}
       <div className="absolute inset-0 overflow-hidden">
-
-        {/* Soft Glowing Gradient Blobs */}
         <div className="absolute top-10 left-10 w-52 h-52 bg-white/10 blur-3xl rounded-full animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-64 h-64 bg-white/5 blur-3xl rounded-full animate-[pulse_6s_ease-in-out_infinite]"></div>
-
-        {/* Glow Rings (rotating rings for modern look) */}
         <div className="absolute top-[45%] left-[20%] w-80 h-80 rounded-full border border-white/20 blur-[2px] animate-spin-slow"></div>
         <div className="absolute bottom-[10%] right-[15%] w-56 h-56 rounded-full border border-white/10 blur-[1px] animate-spin-slower"></div>
-
-        {/* Floating Particles */}
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -152,16 +140,10 @@ export default function Login() {
             }}
           ></div>
         ))}
-
-        {/* Light Grid Pattern (premium SaaS look) */}
         <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-[size:42px_42px]"></div>
 
       </div>
-
-      {/* Title */}
       <h1 className="text-3xl font-bold mb-10 relative z-10">Star-Radiology</h1>
-
-      {/* Slide Texts */}
       <div className="max-w-xl relative z-10">
         <h2 className="text-5xl font-bold leading-tight">
           {slides[current].title}
@@ -169,15 +151,10 @@ export default function Login() {
         <h3 className="text-2xl mt-2 font-semibold">{slides[current].subtitle}</h3>
         <p className="mt-6 text-lg text-white/90">{slides[current].text}</p>
       </div>
-
-      {/* Main doctor image with glow */}
       <img
   src={slides[current].mainImg}
   className="absolute right-10 bottom-10 w-64 h-64 object-cover rounded-full shadow-2xl border-4 border-white ring-8 ring-white/20"
 />
-
-
-      {/* Small floating circle images */}
       <img
         src={slides[current].circles[0]}
         className="absolute right-10 top-24 w-24 rounded-full border-4 border-white shadow-lg ring-4 ring-white/30"
@@ -186,8 +163,6 @@ export default function Login() {
         src={slides[current].circles[1]}
         className="absolute left-10 bottom-20 w-24 rounded-full border-4 border-white shadow-lg ring-4 ring-white/30"
       />
-
-      {/* Bullets */}
       <div className="absolute left-10 bottom-10 flex gap-3 items-center z-10">
         {slides.map((_, i) => (
           <div
@@ -198,8 +173,6 @@ export default function Login() {
           ></div>
         ))}
       </div>
-
-      {/* Next Button */}
       <button
         onClick={() => setCurrent((current + 1) % slides.length)}
         className="absolute right-10 bottom-10 bg-white/40 hover:bg-white/70 p-4 rounded-full text-xl backdrop-blur-md shadow-md z-10"
@@ -211,9 +184,6 @@ export default function Login() {
   </AnimatePresence>
 
 </div>
-
-
-      {/* RIGHT SIDE FORM */}
       <div className="flex items-center justify-center px-6 md:px-16 bg-gradient-to-br from-white via-slate-50 to-blue-50">
 
         <Card className="w-full max-w-md shadow-xl rounded-2xl bg-white/80 backdrop-blur-md">

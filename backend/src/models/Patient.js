@@ -90,8 +90,6 @@ departmentAssignedTo: {
       idNumber: String,
       fileUrl: String,
     },
-
-    // 💥 YEH IMPORTANT HAI — TESTS YAHAN AAYENGE
     selectedTests: [
       {
         testId: String,

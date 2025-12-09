@@ -10,6 +10,6 @@ export const uploadService = {
       headers: { "Content-Type": "multipart/form-data" }
     });
 
-    return res.data.url; // 👉 returns cloudinary secure URL
+    return res.data.url; 
   }
 };

@@ -26,14 +26,16 @@ const departmentSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
-    
-    deptid: { type: Number, required: true },
 
+    deptid: {
+      type: String,
+      required: true,
+      trim: true
+    }
   },
   { timestamps: true }
 );
 
-// 🔍 Faster searching
 departmentSchema.index({ name: "text", code: "text" });
 
 export default mongoose.model("Department", departmentSchema);

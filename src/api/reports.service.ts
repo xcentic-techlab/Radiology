@@ -37,7 +37,6 @@ export const reportsService = {
     return res.data;
   },
 
-  // 🔥 FIXED UPLOAD ROUTE
 uploadFile: async (reportId: string, file: File) => {
   const fd = new FormData();
   fd.append("file", file);

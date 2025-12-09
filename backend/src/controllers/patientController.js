@@ -6,7 +6,6 @@ export async function createPatient(req, res) {
 
     data.createdBy = req.user._id;
 
-    // 🟩 TESTS FIX — ensure selectedTests is always an array
     if (data.selectedTests && Array.isArray(data.selectedTests)) {
       data.selectedTests = data.selectedTests.map(t => ({
         testId: t.testId,

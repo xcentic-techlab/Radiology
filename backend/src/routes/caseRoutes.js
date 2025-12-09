@@ -30,8 +30,6 @@ router.delete(
       if (!caseData) {
         return res.status(404).json({ message: "Case not found" });
       }
-
-      // Clear report if attached
       if (caseData.reportId) {
         await Report.findByIdAndDelete(caseData.reportId);
       }
@@ -70,8 +68,6 @@ router.post(
       if (!report) {
         return res.status(404).json({ message: "Report not found" });
       }
-
-      // Save file inside reportFile
       report.reportFile = {
         url: req.file.path,
         public_id: req.file.filename,
@@ -103,8 +99,6 @@ router.delete(
       if (!caseData) {
         return res.status(404).json({ message: "Case not found" });
       }
-
-      // Clear report if attached
       if (caseData.reportId) {
         await Report.findByIdAndDelete(caseData.reportId);
       }

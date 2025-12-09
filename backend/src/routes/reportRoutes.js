@@ -1,4 +1,4 @@
-// routes/reportRoutes.js
+
 import express from "express";
 import auth from "../middlewares/authMiddleware.js";
 import { permit } from "../middlewares/roleMiddleware.js";
@@ -11,7 +11,6 @@ import cloudinary from "../config/cloudinary.js";
 const router = express.Router();
 
 
-console.log("🔥 REPORT ROUTES LOADED FROM:", import.meta.url);
 
 router.delete(
   "/:id",
@@ -20,14 +19,11 @@ router.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
-      console.log("DELETE HIT", req.params.id);
-      // Find report
+
       const report = await Report.findById(id);
       if (!report) {
         return res.status(404).json({ message: "Report not found" });
       }
-
-      // Remove Cloudinary file if exists
       if (report.reportFile?.public_id) {
         try {
           await cloudinary.uploader.destroy(report.reportFile.public_id);
@@ -35,15 +31,11 @@ router.delete(
           console.log("Cloudinary delete failed", e);
         }
       }
-
-      // Remove link from case
       if (report.caseId) {
         await Case.findByIdAndUpdate(report.caseId, {
           $unset: { reportId: "" },
         });
       }
-
-      // Delete report
       await Report.findByIdAndDelete(id);
 
       res.json({ success: true, message: "Report deleted successfully" });
@@ -54,14 +46,6 @@ router.delete(
   }
 );
 
-
-
-
-
-
-/* =========================
-   ADMIN → GET ALL REPORTS
-========================= */
 router.get(
   "/department/all",
   auth,
@@ -81,9 +65,6 @@ router.get(
   }
 );
 
-/* =========================
-   LOAD REPORTS BY DEPARTMENT
-========================= */
 router.get(
   "/department/:deptId",
   auth,
@@ -145,11 +126,6 @@ router.put(
     }
   }
 );
-
-
-/* =========================
-   CREATE REPORT (CASE BASED)
-========================= */
 router.post(
   "/create",
   auth,
@@ -158,7 +134,7 @@ router.post(
     try {
       const report = new Report({
   patient: req.body.patientId,
-  caseId: req.body.caseId,            // <-- ensure this exists in Report model
+  caseId: req.body.caseId,           
   department: req.body.department,
   createdBy: req.user._id,
   assignedTo: req.body.assignedTo || req.user._id,
@@ -181,11 +157,6 @@ router.post(
     }
   }
 );
-
-
-/* =========================
-   CLOUDINARY FILE UPLOAD
-========================= */
 router.post(
   "/upload/:reportId",
   auth,
@@ -195,21 +166,26 @@ router.post(
     try {
       const { reportId } = req.params;
 
-      if (!req.file)
+      if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
+      }
 
       const report = await Report.findById(reportId);
       if (!report) return res.status(404).json({ message: "Report not found" });
-
-      console.log("DEBUG FILE:", req.file);
-
-      // ⭐ If the file already uploaded by multer-storage-cloudinary
-      //    and path is a Cloudinary URL → USE IT DIRECTLY
-      const cloudURL = req.file.path;  // ⭐ Already hosted PDF URL
-
+      let publicId = req.file.path;
+      publicId = publicId.split("/upload/")[1];
+      publicId = publicId.replace(".pdf", "");
+      const downloadURL = cloudinary.url(publicId, {
+        resource_type: "raw",
+        type: "upload",
+        secure: true,
+        transformation: [
+          { flags: "attachment" }
+        ]
+      });
       report.reportFile = {
-        url: cloudURL,
-        public_id: req.file.filename,  // cloudinary public_id
+        url: downloadURL,
+        public_id: publicId,
         filename: req.file.originalname,
         uploadedBy: req.user._id,
         uploadedAt: new Date(),
@@ -218,6 +194,7 @@ router.post(
       await report.save();
 
       res.json({ message: "Uploaded", report });
+
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
       res.status(500).json({ message: "Server error" });
@@ -225,12 +202,6 @@ router.post(
   }
 );
 
-
-
-
-/* =========================
-   APPROVE REPORT (ADMIN)
-========================= */
 router.post(
   "/:id/approve",
   auth,
@@ -256,14 +227,6 @@ router.post(
   }
 );
 
-
-
-/* ============================================
-   CREATE EMPTY REPORT FOR A CASE (QUICK CREATE)
-=============================================== */
-/* ============================================
-   CREATE EMPTY REPORT FOR A CASE (QUICK CREATE)
-=============================================== */
 router.post(
   "/create/:caseId",
   auth,
@@ -271,21 +234,14 @@ router.post(
   async (req, res) => {
     try {
       const { caseId } = req.params;
-
-      // Check case exists
       const caseData = await Case.findById(caseId);
       if (!caseData) {
         return res.status(404).json({ message: "Case not found" });
       }
-
-      // Get patient phone
       const patientData = await Patient.findById(caseData.patientId);
-      const phone = patientData?.contact?.phone || null;   // ⭐ IMPORTANT ⭐
-
-
-      // Create empty report
+      const phone = patientData?.contact?.phone || null;   
 const newReport = await Report.create({
-  patient: caseData.patientId,   // ✅ FIXED
+  patient: caseData.patientId,
   caseId: caseId,
   department: caseData.department,
   createdBy: req.user._id,
@@ -300,8 +256,6 @@ const newReport = await Report.create({
   createdAt: new Date(),
 });
 
-
-      // Save reportId back to case
       caseData.reportId = newReport._id;
       await caseData.save();
 

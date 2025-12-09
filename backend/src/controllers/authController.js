@@ -8,7 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || "7d";
 
 export async function register(req, res){
-  // Only admin or super_admin can create users — enforce via route middleware
   const { name, email, phone, password, role, department } = req.body;
   if(!name) return res.status(400).json({ message: "Name required" });
 

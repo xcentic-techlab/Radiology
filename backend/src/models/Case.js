@@ -32,7 +32,6 @@ const caseSchema = new mongoose.Schema(
 
     procedure: { 
   type: String, 
-//   required: true 
 },
 
 
@@ -64,7 +63,6 @@ const caseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// AUTO caseNumber
 caseSchema.pre("save", function (next) {
   if (!this.caseNumber) {
     this.caseNumber = "CASE-" + Date.now();

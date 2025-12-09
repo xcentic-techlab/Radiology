@@ -11,13 +11,10 @@ import { uploadGovtId } from "../middlewares/cloudUpload.js";
 
 const router = express.Router();
 
-// Create patient - Reception/Admin
 router.post("/", auth, permit("reception", "admin", "super_admin"), createPatient);
 
-// Get single patient
 router.get("/:id", auth, getPatient);
 
-// List patients
 router.get("/", auth, listPatients);
 
 
@@ -41,14 +38,11 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 
-// Payment Done -> Change status
 router.post("/:id/payment", auth, permit("reception", "admin"), async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     if (!patient)
       return res.status(404).json({ message: "Patient not found" });
-
-    // Update status
     patient.status = "in_progress";
     patient.paymentStatus = "paid";
 
@@ -138,7 +132,6 @@ router.post(
       const patient = await Patient.findById(req.params.id);
       if (!patient) return res.status(404).json({ message: "Not found" });
 
-      // 🚀 FIX — create govtId object if missing
       if (!patient.govtId) {
         patient.govtId = {};
       }

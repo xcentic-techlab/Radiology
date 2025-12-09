@@ -28,13 +28,8 @@ const DepartmentDashboard = () => {
 const [approvedCount, setApprovedCount] = useState(0);
 
 
-  // popups
   const [openOverview, setOpenOverview] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
-
-  /* -----------------------------
-     REPORT OVERVIEW FILTERS
-  ----------------------------- */
   const overviewFilters = [
     { label: "Today's Reports", value: "today" },
     { label: "Yesterday", value: "yesterday" },
@@ -44,9 +39,6 @@ const [approvedCount, setApprovedCount] = useState(0);
     { label: "Custom Range", value: "custom" },
   ];
 
-  /* -----------------------------
-     REPORT STATUS FILTERS
-  ----------------------------- */
   const statusFilters = [
     { label: "Pending Reports", value: "pending" },
     { label: "Approved Reports", value: "approved" },
@@ -58,7 +50,8 @@ const [approvedCount, setApprovedCount] = useState(0);
 
 async function loadReportCounts() {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reports/department/${user?.department?._id}`);
+    // const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reports/department/${user?.department?._id}`);
+    const res = await fetch(`/reports/department/${user?.department?._id}`);
     const data = await res.json();
 
     setPendingCount(data.filter(r => r.status === "pending").length);
@@ -72,8 +65,6 @@ async function loadReportCounts() {
   return (
     <>
       <div className="space-y-10">
-
-        {/* HEADER */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
             Department Dashboard
@@ -82,7 +73,6 @@ async function loadReportCounts() {
             Manage and track reports efficiently
           </p>
 
-          {/* Department badge */}
           <div className="flex justify-center mt-3">
             <div className="px-5 py-2 rounded-xl bg-white/70 backdrop-blur-md border shadow">
               <span className="text-sm font-semibold">
@@ -94,11 +84,7 @@ async function loadReportCounts() {
             </div>
           </div>
         </div>
-
-        {/* MAIN CARDS (Reception style) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          {/* REPORT OVERVIEW */}
           <Card
             onClick={() => setOpenOverview(true)}
             className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
@@ -111,8 +97,6 @@ async function loadReportCounts() {
               <p className="text-sm text-blue-700 font-medium">View →</p>
             </CardContent>
           </Card>
-
-          {/* REPORT STATUS */}
           <Card
             onClick={() => setOpenStatus(true)}
             className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
@@ -125,8 +109,6 @@ async function loadReportCounts() {
               <p className="text-sm text-blue-700 font-medium">View →</p>
             </CardContent>
           </Card>
-
-          {/* QUICK CREATE CASE */}
           <Card
             onClick={() => navigate("/department/create-cases")}
             className="rounded-2xl cursor-pointer bg-blue-50 hover:bg-blue-100 border shadow-md transition"
@@ -141,10 +123,6 @@ async function loadReportCounts() {
           </Card>
 
         </div>
-
-        {/* ----------------------------------
-           POPUP 1 : REPORT OVERVIEW MODAL
-        ---------------------------------- */}
         <Dialog open={openOverview} onOpenChange={setOpenOverview}>
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>
@@ -175,10 +153,6 @@ async function loadReportCounts() {
             </div>
           </DialogContent>
         </Dialog>
-
-        {/* ----------------------------------
-           POPUP 2 : REPORT STATUS MODAL
-        ---------------------------------- */}
         <Dialog open={openStatus} onOpenChange={setOpenStatus}>
           <DialogContent className="max-w-md rounded-2xl">
             <DialogHeader>

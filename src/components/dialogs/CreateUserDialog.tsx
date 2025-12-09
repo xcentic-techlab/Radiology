@@ -99,8 +99,7 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
     </DialogHeader>
 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      
-      {/* Name */}
+
       <div className="space-y-1">
         <Label htmlFor="name">Name *</Label>
         <Input
@@ -112,8 +111,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
         />
         {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
       </div>
-
-      {/* Email */}
       <div className="space-y-1">
         <Label htmlFor="email">Email *</Label>
         <Input
@@ -125,8 +122,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
         />
         {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
       </div>
-
-      {/* Phone */}
       <div className="space-y-1">
         <Label htmlFor="phone">Phone</Label>
         <Input
@@ -136,8 +131,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
           disabled={isLoading}
         />
       </div>
-
-      {/* Password */}
       <div className="space-y-1">
         <Label htmlFor="password">Password *</Label>
         <Input
@@ -149,8 +142,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
         />
         {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
       </div>
-
-      {/* Role */}
       <div className="space-y-1">
         <Label>Role *</Label>
         <Select
@@ -172,8 +163,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
           </SelectContent>
         </Select>
       </div>
-
-      {/* Department (Only when needed) */}
       {roleNeedsDepartment && (
         <div className="space-y-1">
           <Label>Department *</Label>
@@ -195,8 +184,6 @@ const CreateUserDialog = ({ open, onClose, onSuccess, departments }: CreateUserD
           </Select>
         </div>
       )}
-
-      {/* Buttons */}
       <div className="flex justify-end gap-3 pt-2">
         <Button
           type="button"

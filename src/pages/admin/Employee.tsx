@@ -238,7 +238,6 @@ const [deleteLoading, setDeleteLoading] = useState(false);
           </CardContent>
         </Card>
 
-        {/* USERS TABLE */}
         <Card className="border shadow-sm">
           <CardContent className="p-0">
             <Table>
@@ -300,7 +299,6 @@ const [deleteLoading, setDeleteLoading] = useState(false);
                       <TableCell className="text-right pr-6">
   <div className="flex justify-end gap-2">
 
-    {/* Toggle Active Btn */}
     <Button
       variant="ghost"
       size="icon"
@@ -309,8 +307,6 @@ const [deleteLoading, setDeleteLoading] = useState(false);
     >
       <Power className="h-4 w-4 text-gray-700" />
     </Button>
-
-    {/* DELETE USER BTN */}
     <Button
       variant="destructive"
       size="icon"
@@ -332,8 +328,6 @@ const [deleteLoading, setDeleteLoading] = useState(false);
           </CardContent>
         </Card>
       </div>
-
-      {/* CREATE USER DIALOG */}
       <CreateUserDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

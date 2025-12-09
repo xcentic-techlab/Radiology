@@ -14,13 +14,6 @@ import { deleteUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
-/**
- * Super Admin & Admin:
- *  - View all users
- *  - Update users
- *  - Activate / deactivate users
- */
-
 router.delete(
   "/:id",
   auth,

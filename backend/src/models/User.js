@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     enum: ["super_admin","admin","reception","department_user","patient"],
     default: "reception"
   },
-  department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" }, // for department_user
+  department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" }, 
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

@@ -15,7 +15,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-// 🎨 ROLE COLORS
 const roleColors = {
   admin: "bg-blue-100 text-blue-700",
   reception: "bg-purple-100 text-purple-700",
@@ -23,7 +22,6 @@ const roleColors = {
   patient: "bg-gray-200 text-gray-700",
 };
 
-// 🎨 DEPARTMENT COLORS (Auto Rotate)
 const departmentColors = [
   "bg-red-100 text-red-700",
   "bg-blue-100 text-blue-700",
@@ -42,19 +40,16 @@ export default function UsersFilter() {
 
   const [departments, setDepartments] = useState([]);
 
-  // filters
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
 
-  // date filters
   const [rangeKey, setRangeKey] = useState("all");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
   const [loading, setLoading] = useState(false);
 
-  // Load data on mount
   useEffect(() => {
     fetchAll();
   }, []);
@@ -87,7 +82,6 @@ export default function UsersFilter() {
   function applyFilters() {
     let data = [...users];
 
-    // 🔍 Search
     if (search.trim()) {
       data = data.filter(
         (u) =>
@@ -96,19 +90,16 @@ export default function UsersFilter() {
       );
     }
 
-    // Status Filter
     if (statusFilter !== "all") {
       data = data.filter((u) =>
         statusFilter === "active" ? u.isActive === true : u.isActive === false
       );
     }
 
-    // Department Filter
     if (departmentFilter !== "all") {
       data = data.filter((u) => u.department?._id === departmentFilter);
     }
 
-    // Date Filter
     if (rangeKey !== "all") {
       let fromTo = getRangeForKey(rangeKey, customFrom, customTo);
       if (!fromTo) fromTo = getRangeForKey("24h", "", "");
@@ -129,7 +120,6 @@ export default function UsersFilter() {
     <>
       <div className="space-y-6">
 
-        {/* PAGE HEADER */}
         <div className="text-center space-y-1">
           <h1 className="text-4xl font-bold">Employee Directory</h1>
           <p className="text-muted-foreground">
@@ -137,10 +127,8 @@ export default function UsersFilter() {
           </p>
         </div>
 
-        {/* FILTER BAR */}
         <div className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          {/* SEARCH */}
           <Input
             placeholder="Search name or email..."
             value={search}
@@ -148,7 +136,6 @@ export default function UsersFilter() {
             className="glass-input"
           />
 
-          {/* STATUS FILTER */}
           <select
             className="border px-3 py-2 rounded-lg bg-white/50 backdrop-blur"
             value={statusFilter}
@@ -158,8 +145,6 @@ export default function UsersFilter() {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-
-          {/* DEPARTMENT FILTER */}
           <select
             className="border px-3 py-2 rounded-lg bg-white/50 backdrop-blur"
             value={departmentFilter}
@@ -172,8 +157,6 @@ export default function UsersFilter() {
               </option>
             ))}
           </select>
-
-          {/* DATE FILTER */}
           <select
             className="border px-3 py-2 rounded-lg bg-white/50 backdrop-blur"
             value={rangeKey}
@@ -187,8 +170,6 @@ export default function UsersFilter() {
             <option value="1y">Last 1 Year</option>
             <option value="custom">Custom</option>
           </select>
-
-          {/* CUSTOM DATE PICKER */}
           {rangeKey === "custom" && (
             <div className="flex gap-4 col-span-full">
               <Input
@@ -215,7 +196,6 @@ export default function UsersFilter() {
           )}
         </div>
 
-        {/* TABLE */}
         <div className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl p-4 overflow-auto">
 
           <Table>
@@ -241,8 +221,6 @@ export default function UsersFilter() {
                   </TableCell>
 
                   <TableCell>{u.email}</TableCell>
-
-                  {/* ROLE BADGE */}
                   <TableCell>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium 
@@ -251,8 +229,6 @@ export default function UsersFilter() {
                       {u.role.replace("_", " ")}
                     </span>
                   </TableCell>
-
-                  {/* STATUS */}
                   <TableCell>
                     {u.isActive ? (
                       <span className="text-green-600 font-semibold">Active</span>
@@ -260,8 +236,6 @@ export default function UsersFilter() {
                       <span className="text-red-500 font-semibold">Inactive</span>
                     )}
                   </TableCell>
-
-                  {/* DEPARTMENT BADGE */}
                   <TableCell>
                     {u.department?.name ? (
                       <span

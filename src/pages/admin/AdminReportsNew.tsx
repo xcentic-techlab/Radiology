@@ -67,7 +67,6 @@ useEffect(() => {
 const filtered = reports.filter((r) => {
   const searchText = q.toLowerCase();
 
-  // SEARCH FILTER (includes: case number + patient + department)
   const matchSearch =
     !q ||
     (r.caseNumber || "").toLowerCase().includes(searchText) ||
@@ -76,10 +75,8 @@ const filtered = reports.filter((r) => {
       .includes(searchText) ||
     (r.department?.name || "").toLowerCase().includes(searchText);
 
-  // STATUS FILTER
   const matchStatus = status === "all" ? true : r.status === status;
 
-  // DEPARTMENT FILTER
   const matchDept =
     deptFilter === "all" ? true : r.department?._id === deptFilter;
 

@@ -52,18 +52,13 @@ const handleDelete = async () => {
   setDeleteLoading(true);
 
   try {
-    console.log("DELETE → CASE ID:", deleteTarget._id);
-    console.log("DELETE → REPORT ID:", deleteTarget.reportId);
 
-    // 1️⃣ Delete Case (this will auto delete report in backend)
     await casesService.deleteCase(deleteTarget._id);
 
     toast({
       title: "Deleted",
       description: "Case and linked report deleted successfully.",
     });
-
-    // Remove from UI
     setReports(prev => prev.filter(r => r._id !== deleteTarget._id));
     setFilteredReports(prev => prev.filter(r => r._id !== deleteTarget._id));
 
@@ -78,10 +73,6 @@ const handleDelete = async () => {
     setDeleteTarget(null);
   }
 };
-
-
-
-  // Apply URL filters (today, week, month, status)
   useEffect(() => {
     const dateParam = searchParams.get("date");
     const statusParam = searchParams.get("status");
@@ -93,7 +84,6 @@ const handleDelete = async () => {
     }));
   }, [searchParams]);
 
-  // Fetch reports
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -116,11 +106,9 @@ const handleDelete = async () => {
     fetchReports();
   }, []);
 
-  // Apply all filters
   useEffect(() => {
     let result = [...reports];
 
-    // CASE ID FILTER
     if (filters.caseId.trim() !== "") {
       const s = filters.caseId.toLowerCase();
       result = result.filter((r) =>
@@ -128,7 +116,6 @@ const handleDelete = async () => {
       );
     }
 
-    // PATIENT NAME FILTER
     if (filters.patientName.trim() !== "") {
       const s = filters.patientName.toLowerCase();
       result = result.filter((r) => {
@@ -137,7 +124,6 @@ const handleDelete = async () => {
       });
     }
 
-    // STATUS FILTER
     if (filters.status === "pending") {
       result = result.filter((r) => r.status?.toLowerCase() !== "approved");
     }
@@ -145,7 +131,6 @@ const handleDelete = async () => {
       result = result.filter((r) => r.status?.toLowerCase() === "approved");
     }
 
-    // DATE FILTER
     if (filters.date !== "all") {
       const now = new Date();
       result = result.filter((report) => {
@@ -238,7 +223,6 @@ const handleDelete = async () => {
 )}
 
       <div className="space-y-10">
-        {/* HEADER */}
         <div className="text-center space-y-1">
           <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
             Create Reports
@@ -247,16 +231,9 @@ const handleDelete = async () => {
             Manage department reports
           </p>
         </div>
-
-
-
-
-        {/* FILTER CARD */}
         <Card className="bg-white/60 backdrop-blur-md border border-white/40 shadow-xl rounded-2xl">
           <CardHeader className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-
-              {/* CASE ID */}
               <Input
                 placeholder="Filter by Case ID"
                 className="rounded-xl shadow-sm bg-white/50"
@@ -265,8 +242,6 @@ const handleDelete = async () => {
                   setFilters((f) => ({ ...f, caseId: e.target.value }))
                 }
               />
-
-              {/* PATIENT NAME */}
               <Input
                 placeholder="Filter by Patient Name"
                 className="rounded-xl shadow-sm bg-white/50"
@@ -275,8 +250,6 @@ const handleDelete = async () => {
                   setFilters((f) => ({ ...f, patientName: e.target.value }))
                 }
               />
-
-              {/* DATE FILTER */}
               <select
                 className="border rounded-xl px-3 py-2 bg-white/50 shadow-sm"
                 value={filters.date}
@@ -292,8 +265,6 @@ const handleDelete = async () => {
                 <option value="year">Last 1 Year</option>
                 <option value="custom">Custom</option>
               </select>
-
-              {/* CUSTOM RANGE */}
               {filters.date === "custom" && (
                 <>
                   <Input
@@ -316,8 +287,6 @@ const handleDelete = async () => {
               )}
             </div>
           </CardHeader>
-
-          {/* TABLE */}
           <CardContent>
             <div className="overflow-x-auto rounded-xl border bg-white/70 backdrop-blur-sm shadow-lg">
               <Table>
@@ -369,13 +338,11 @@ const handleDelete = async () => {
 
 <TableCell className="text-right">
   <div className="flex justify-end items-center gap-3">
-
-    {/* CREATE BUTTON */}
     {!report.reportId && (
       <Button
         size="sm"
         className="rounded-md bg-blue-600 text-white px-3 py-1.5 shadow-sm 
-                   hover:bg-blue-700 transition"
+                  hover:bg-blue-700 transition"
         onClick={async () => {
           try {
             const res = await casesService.createReport(report._id);
@@ -392,8 +359,6 @@ const handleDelete = async () => {
         Create
       </Button>
     )}
-
-    {/* VIEW BUTTON */}
     {report.reportId && (
       <Button
         size="sm"
@@ -404,8 +369,6 @@ const handleDelete = async () => {
         View
       </Button>
     )}
-
-    {/* PDF BUTTON */}
     {report.reportFile && (
       <Button
         size="sm"
@@ -416,8 +379,6 @@ const handleDelete = async () => {
         PDF
       </Button>
     )}
-
-    {/* DELETE ICON ROUND BUTTON */}
     <button
       onClick={() => setDeleteTarget(report)}
       className="

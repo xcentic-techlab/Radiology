@@ -1,4 +1,4 @@
-// small helper to return date ranges
+
 export function getRangeForKey(key, customFrom, customTo) {
   const now = new Date();
   let from = new Date();

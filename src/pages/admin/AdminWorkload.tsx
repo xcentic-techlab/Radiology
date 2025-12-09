@@ -46,13 +46,11 @@ export default function AdminWorkload() {
     return {
       reports: depReports.length,
       patients: patients.size,
-      // assigned: assignedUsers.size,
     };
   }
 
   return (
     <>
-      {/* HEADER */}
       <div className="text-center mb-8 space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Department Workload</h1>
         <p className="text-muted-foreground">
@@ -60,7 +58,6 @@ export default function AdminWorkload() {
         </p>
       </div>
 
-      {/* GRID OF DEPARTMENTS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {departments.map((d) => {
           const s = statsForDepartment(d);
@@ -76,7 +73,6 @@ export default function AdminWorkload() {
                 hover:bg-white/80 hover:shadow-2xl
               "
             >
-              {/* Department Title */}
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">{d.name}</h2>
                 <p className="text-sm text-muted-foreground">

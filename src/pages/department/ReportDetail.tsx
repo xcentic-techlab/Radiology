@@ -20,35 +20,26 @@ const ReportDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-
   const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-
-  /** REPORT STATES */
   const [findings, setFindings] = useState("");
   const [impression, setImpression] = useState("");
   const [procedure, setProcedure] = useState("");
-
-  /** PATIENT EDIT MODE */
   const [isEditingPatient, setIsEditingPatient] = useState(false);
   const [patientForm, setPatientForm] = useState<any>({});
   const [clinicalHistory, setClinicalHistory] = useState("");
-const [previousInjury, setPreviousInjury] = useState("");
-const [previousSurgery, setPreviousSurgery] = useState("");
-const [initialLoadDone, setInitialLoadDone] = useState(false);
-const [indication, setIndication] = useState("");
-const [technique, setTechnique] = useState("");
-const [conclusion, setConclusion] = useState("");
-const [notes, setNotes] = useState("");
-const [govIdFile, setGovIdFile] = useState<File | null>(null);
-const [govUploading, setGovUploading] = useState(false);
-
-
-
-
+  const [previousInjury, setPreviousInjury] = useState("");
+  const [previousSurgery, setPreviousSurgery] = useState("");
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [indication, setIndication] = useState("");
+  const [technique, setTechnique] = useState("");
+  const [conclusion, setConclusion] = useState("");
+  const [notes, setNotes] = useState("");
+  const [govIdFile, setGovIdFile] = useState<File | null>(null);
+  const [govUploading, setGovUploading] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
@@ -66,7 +57,7 @@ const [govUploading, setGovUploading] = useState(false);
     });
 
     setGovIdFile(null);
-    loadReport(); // refresh UI
+    loadReport();
   } catch (err) {
     toast({
       title: "Error",
@@ -78,25 +69,17 @@ const [govUploading, setGovUploading] = useState(false);
   }
 };
 
-
-  // ###########################
-  // LOAD REPORT
-  // ###########################
 const loadReport = async () => {
   setLoading(true);
 
   try {
     const data = await reportsService.getById(id as string);
     setReport(data);
-
-    // always update findings
     setFindings(data.findings || "");
     setImpression(data.impression || "");
     setProcedure(data.procedure || "");
 
     const p = data.patient || {};
-
-    // always update clinical fields
     setClinicalHistory(p.clinicalHistory || "");
     setPreviousInjury(p.previousInjury || "");
     setPreviousSurgery(p.previousSurgery || "");
@@ -105,9 +88,6 @@ const loadReport = async () => {
 setTechnique(data.technique || "");
 setConclusion(data.conclusion || "");
 setNotes(data.notes || "");
-
-
-    // 🚀 PATIENT FORM KO SIRF FIRST TIME LOAD KARO
     if (!initialLoadDone) {
       setPatientForm({
         firstName: p.firstName || "",
@@ -126,7 +106,7 @@ setNotes(data.notes || "");
         selectedTests: p.selectedTests || []
       });
 
-      setInitialLoadDone(true);  // mark as loaded
+      setInitialLoadDone(true);
     }
 
   } catch (error) {
@@ -145,11 +125,6 @@ useEffect(() => {
   if (id) loadReport();
 }, [id]);
 
-
-
-  // ###########################
-  // SAVE PATIENT DETAILS
-  // ###########################
   const savePatientDetails = async () => {
     try {
       setSaving(true);
@@ -188,9 +163,6 @@ useEffect(() => {
     }
   };
 
-  // ###########################
-  // SAVE REPORT FINDINGS
-  // ###########################
   const saveFindings = async () => {
     try {
       setSaving(true);
@@ -216,9 +188,6 @@ useEffect(() => {
     }
   };
 
-  // ###########################
-  // FILE UPLOAD
-  // ###########################
   const uploadFile = async () => {
     if (!selectedFile) return;
     setUploading(true);
@@ -238,34 +207,35 @@ useEffect(() => {
     setUploading(false);
   };
 
-  // ###########################
-  // UPDATE WORKFLOW STATUS
-  // ###########################
 const changeStatus = async (status) => {
   try {
-    setSaving(true);
+    setApproving(true); 
 
     await reportsService.update(report._id, { status });
 
     const caseId = report.caseId || report.case?._id || report.case;
-    if (!caseId) return;
+    if (caseId) {
+      await casesService.update(caseId, { status });
+    }
 
-    // case follows report
-    await casesService.update(caseId, { status });
-
-    toast({ title: "Updated", description: `Marked as ${status}` });
+    toast({
+      title: "Success",
+      description: "Report approved successfully",
+    });
 
     loadReport();
   } catch (error) {
     console.error(error);
+    toast({
+      title: "Error",
+      description: "Failed to approve report",
+      variant: "destructive",
+    });
   } finally {
-    setSaving(false);
+    setApproving(false);
   }
 };
 
-  // ###########################
-// SAVE CLINICAL HISTORY
-// ###########################
 const saveClinicalHistory = async () => {
   try {
     setSaving(true);
@@ -481,11 +451,13 @@ const saveProcedureDetails = async () => {
       </div>
 
       <div>
-        <Input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
-        />
+        <input
+  type="file"
+  accept="image/*,application/pdf"
+  onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
+  className="border p-2 rounded w-full"
+/>
+
 
         <Button
           className="mt-2"
@@ -500,11 +472,13 @@ const saveProcedureDetails = async () => {
   ) : (
     <>
       <div className="flex gap-3 mt-2">
-        <Input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
-        />
+        <input
+  type="file"
+  accept="image/*,application/pdf"
+  onChange={(e) => setGovIdFile(e.target.files?.[0] || null)}
+  className="border p-2 rounded"
+/>
+
 
         <Button
           size="sm"
@@ -725,14 +699,11 @@ const saveProcedureDetails = async () => {
       />
     </div>
 
-    {/* SAVE BUTTON FOR THIS SECTION */}
     <Button onClick={saveProcedureDetails} disabled={saving}>
       {saving ? "Saving..." : "Save Procedure Details"}
     </Button>
   </CardContent>
 </Card>
-
-        {/* Clinical history (patient model) */}
         <Card>
           <CardHeader>
             <CardTitle>Clinical History</CardTitle>
@@ -755,9 +726,6 @@ const saveProcedureDetails = async () => {
             </div>
           </CardContent>
         </Card>
-
-        
-        {/* Findings & Impression */}
         <Card>
           <CardHeader>
             <CardTitle>Findings & Impression</CardTitle>
@@ -777,60 +745,115 @@ const saveProcedureDetails = async () => {
           </CardContent>
         </Card>
 
-        {/* File upload / view */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Report File</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!report.reportFile ? (
-              <div className="space-y-3">
-                <Label>Upload final PDF</Label>
-                <div className="flex gap-2 items-center">
-                  <Input type="file" accept="application/pdf,image/*" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} disabled={uploading} />
-                  <Button onClick={uploadFile} disabled={!selectedFile || uploading}>
-                    <Upload className="mr-2 h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload'}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-medium">{report.reportFile?.filename || 'Report.pdf'}</p>
-                    <a href={report.reportFile?.url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">View / Download</a>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => { navigator.clipboard?.writeText(report.reportFile?.url || ''); toast({ title: 'Copied', description: 'File URL copied' }); }}>Copy URL</Button>
-                  <Button size="sm" variant="outline" onClick={() => { setSelectedFile(null); setReport({ ...report, reportFile: null }); }}>Replace</Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-
-
-
-
-        {/* Workflow actions */}
 <Card>
   <CardHeader>
-    <CardTitle>Workflow</CardTitle>
+    <CardTitle>Report File</CardTitle>
+  </CardHeader>
+
+  <CardContent className="space-y-4">
+    {!report.reportFile ? (
+      <div className="space-y-3">
+        <Label>Upload final PDF</Label>
+
+        <div className="flex gap-2 items-center">
+          <input
+            type="file"
+            accept="application/pdf,image/*"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            disabled={uploading}
+            className="border p-2 rounded w-full"
+          />
+
+          <Button onClick={uploadFile} disabled={!selectedFile || uploading}>
+            <Upload className="mr-2 h-4 w-4" />
+            {uploading ? "Uploading…" : "Upload"}
+          </Button>
+        </div>
+      </div>
+    ) : (
+      <div className="flex items-center justify-between border p-4 rounded-lg">
+        
+        <div className="flex items-center gap-3">
+          <FileText className="h-8 w-8 text-primary" />
+
+          <div>
+            <p className="font-medium text-sm">
+              {report.reportFile.filename || "Report.pdf"}
+            </p>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-primary"
+              onClick={async () => {
+                try {
+                  const response = await fetch(report.reportFile.url, {
+                    method: "GET",
+                  });
+
+                  const blob = await response.blob();
+                  const blobUrl = window.URL.createObjectURL(blob);
+
+                  const link = document.createElement("a");
+                  link.href = blobUrl;
+                  link.download =
+                    report.reportFile.filename || "report.pdf";
+                  document.body.appendChild(link);
+                  link.click();
+
+                  window.URL.revokeObjectURL(blobUrl);
+                  document.body.removeChild(link);
+                } catch (err) {
+                  console.error("Download error:", err);
+                }
+              }}
+            >
+              Download PDF
+            </Button>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {/* COPY URL
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard.writeText(report.reportFile.url || "");
+              toast({
+                title: "Copied",
+                description: "PDF URL copied to clipboard",
+              });
+            }}
+          >
+            Copy URL
+          </Button> */}
+
+          {/* Replace */}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setSelectedFile(null);
+              setReport({ ...report, reportFile: null });
+            }}
+          >
+            Replace
+          </Button>
+        </div>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
+<Card>
+  <CardHeader>
+    <CardTitle>Status</CardTitle>
   </CardHeader>
 
   <CardContent className="flex flex-wrap gap-3">
-
-    {/* Show Approve btn only when PENDING */}
     {report.status === "pending" && (
-      <Button onClick={() => changeStatus("approved")}>
-        Approve Report
-      </Button>
-    )}
-
-    {/* Already Approved */}
+  <Button onClick={() => changeStatus("approved")} disabled={approving}>
+    {approving ? "Approving…" : "Approve Report"}
+  </Button>
+)}
     {report.status === "approved" && (
       <StatusBadge status="approved" />
     )}

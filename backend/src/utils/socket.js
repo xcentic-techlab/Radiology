@@ -4,8 +4,6 @@ export function initSocket(serverIo) {
   io = serverIo;
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
-
-    // optionally join rooms by department or user id
     socket.on("joinRoom", ({ room }) => {
       socket.join(room);
     });
@@ -20,13 +18,11 @@ export function initSocket(serverIo) {
   });
 }
 
-// send to room
 export function emitToRoom(room, event, payload){
   if(!io) return;
   io.to(room).emit(event, payload);
 }
 
-// send globally
 export function emitGlobal(event, payload){
   if(!io) return;
   io.emit(event, payload);

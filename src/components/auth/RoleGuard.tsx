@@ -11,7 +11,6 @@ const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {
   const { user } = useAuthStore();
 
   if (!user || !allowedRoles.includes(user.role)) {
-    // Redirect to their appropriate dashboard
     const redirectMap: Record<string, string> = {
       super_admin: '/admin/dashboard',
       admin: '/admin/dashboard',

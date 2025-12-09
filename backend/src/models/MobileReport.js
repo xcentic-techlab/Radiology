@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const reportSchema = new mongoose.Schema(
@@ -6,18 +5,19 @@ const reportSchema = new mongoose.Schema(
     patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient", required: true },
     department: { type: mongoose.Schema.Types.ObjectId, ref: "Department", required: true },
 
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "MobileUser" },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "MobileUser" },
 
     caseNumber: { type: String, unique: true },
     case: { type: mongoose.Schema.Types.ObjectId, ref: "Case" },
 
-
     status: {
-  type: String,
-  enum: ["pending", "approved"],
-  default: "pending",
-},
+      type: String,
+      enum: ["pending", "approved"],
+      default: "pending",
+    },
+
+    phone: { type: String, required: true },
 
 
     procedure: String,
@@ -30,18 +30,15 @@ const reportSchema = new mongoose.Schema(
     conclusion: String,
     notes: String,
 
-    phone: { type: String },
-
-
     reportFile: {
       url: String,
       public_id: String,
       filename: String,
-      uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "MobileUser" },
       uploadedAt: Date,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Report", reportSchema);
+export default mongoose.model("MobileReport", reportSchema, "reports");

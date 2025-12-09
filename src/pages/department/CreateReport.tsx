@@ -37,7 +37,7 @@ const CreateReport = () => {
   const submitReport = async (data) => {
     try {
       const payload = {
-  caseId: caseData._id,   // ⭐ REQUIRED
+  caseId: caseData._id,   
   patientId: caseData.patientId._id,
   department: caseData.department,
   procedure: data.procedure,
@@ -53,12 +53,9 @@ const CreateReport = () => {
 
       const report = await reportsService.create(payload);
 
-      // FILE UPLOAD
       if (file) {
         await reportsService.uploadFile(report._id, file);
       }
-
-      // UPDATE CASE (attach report + status)
 await casesService.update(caseData._id, {
   reportId: report._id,
   status: "created"
@@ -68,8 +65,6 @@ toast({
   title: "Success",
   description: "Report created successfully.",
 });
-
-// Redirect to view page
 navigate(`/department/report/${report._id}`);
 
     } catch (err) {
@@ -86,7 +81,6 @@ navigate(`/department/report/${report._id}`);
   <>
     <div className="max-w-3xl mx-auto space-y-10">
 
-      {/* PAGE TITLE */}
       <div className="text-center space-y-1">
         <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
           Create Report
@@ -96,7 +90,6 @@ navigate(`/department/report/${report._id}`);
         </p>
       </div>
 
-      {/* MAIN CARD */}
       <Card className="bg-white/60 backdrop-blur-md border border-white/40 shadow-xl rounded-2xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-xl font-semibold">
@@ -109,8 +102,6 @@ navigate(`/department/report/${report._id}`);
 
         <CardContent className="pt-4">
           <form className="space-y-6" onSubmit={handleSubmit(submitReport)}>
-
-            {/* FIELD: Procedure */}
             <div className="space-y-1">
               <label className="font-medium">Procedure</label>
               <Input
@@ -118,8 +109,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("procedure")}
               />
             </div>
-
-            {/* FIELD: Indication */}
             <div className="space-y-1">
               <label className="font-medium">Indication</label>
               <Textarea
@@ -128,8 +117,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("indication")}
               />
             </div>
-
-            {/* FIELD: Technique */}
             <div className="space-y-1">
               <label className="font-medium">Technique</label>
               <Textarea
@@ -138,8 +125,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("technique")}
               />
             </div>
-
-            {/* FIELD: Findings */}
             <div className="space-y-1">
               <label className="font-medium">Findings</label>
               <Textarea
@@ -148,8 +133,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("findings")}
               />
             </div>
-
-            {/* FIELD: Impression */}
             <div className="space-y-1">
               <label className="font-medium">Impression</label>
               <Textarea
@@ -158,8 +141,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("impression")}
               />
             </div>
-
-            {/* FIELD: Conclusion */}
             <div className="space-y-1">
               <label className="font-medium">Conclusion</label>
               <Textarea
@@ -168,8 +149,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("conclusion")}
               />
             </div>
-
-            {/* FIELD: Notes */}
             <div className="space-y-1">
               <label className="font-medium">Notes</label>
               <Textarea
@@ -178,8 +157,6 @@ navigate(`/department/report/${report._id}`);
                 {...register("notes")}
               />
             </div>
-
-            {/* PDF Upload */}
             <div className="space-y-1">
               <label className="font-medium">Upload PDF Report</label>
               <Input
@@ -189,8 +166,6 @@ navigate(`/department/report/${report._id}`);
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
             </div>
-
-            {/* SUBMIT BUTTON */}
             <div className="pt-4 flex justify-end">
   <Button
     type="submit"

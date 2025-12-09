@@ -4,10 +4,9 @@ export interface DepartmentPayload {
   name: string;
   code: string;
   description?: string;
-  isActive?: boolean;   // <-- ADD THIS
+  isActive?: boolean;  
+  deptid: string;
 }
-
-// 🔥 YEH ADD KARNA ZARURI HAI
 export interface Department {
   _id: string;
   name: string;
@@ -28,6 +27,7 @@ export const departmentsService = {
   },
 
   create: async (data: DepartmentPayload) => {
+
     const res = await api.post("/departments", data);
     return res.data;
   },

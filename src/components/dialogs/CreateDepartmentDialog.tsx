@@ -20,6 +20,7 @@ const departmentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   code: z.string().min(2, 'Code must be at least 2 characters').max(10, 'Code must be max 10 characters'),
   description: z.string().optional(),
+  deptid: z.string().min(1, "Department ID is required"),
 });
 
 type DepartmentForm = z.infer<typeof departmentSchema>;
@@ -84,12 +85,8 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
     </DialogHeader>
 
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-      {/* Section: Basic Details */}
       <div className="p-4 rounded-xl bg-white/50 shadow-md space-y-4 border border-white/40">
         <h2 className="font-semibold text-lg">Department Details</h2>
-
-        {/* NAME */}
         <div className="space-y-1">
           <Label htmlFor="name">Name *</Label>
           <Input
@@ -102,7 +99,18 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
           {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
         </div>
 
-        {/* CODE */}
+        <div className="space-y-1">
+  <Label htmlFor="deptid">Department ID *</Label>
+  <Input
+    id="deptid"
+    placeholder="e.g., DPT-001"
+    {...register("deptid")}
+    disabled={isLoading}
+    className="glass-input"
+  />
+  {errors.deptid && <p className="text-sm text-red-500">{errors.deptid.message}</p>}
+</div>
+
         <div className="space-y-1">
           <Label htmlFor="code">Code *</Label>
           <Input
@@ -115,7 +123,6 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
           {errors.code && <p className="text-sm text-red-500">{errors.code.message}</p>}
         </div>
 
-        {/* DESCRIPTION */}
         <div className="space-y-1">
           <Label htmlFor="description">Description</Label>
           <Textarea
@@ -128,7 +135,6 @@ const CreateDepartmentDialog = ({ open, onClose, onSuccess }: CreateDepartmentDi
         </div>
       </div>
 
-      {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-3">
         <Button
           type="button"

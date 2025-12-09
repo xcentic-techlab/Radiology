@@ -9,7 +9,6 @@ export const createCase = async (req, res) => {
       patientId,
       department,
       assignedTo: assignedTo || null,
-      // procedure & scheduledAt auto-set by model defaults
     });
 
     res.json(newCase);
@@ -25,14 +24,13 @@ export const getCasesByDepartment = async (req, res) => {
     const cases = await Case.find({ department: req.params.deptId })
       .populate("patientId")
       .populate("assignedTo")
-      .populate("reportId");  // 🔥 FIX: include the report!
+      .populate("reportId"); 
 
-    // Format response
     const formatted = cases.map(c => ({
       ...c._doc,
       patient: c.patientId,
-      reportId: c.reportId?._id || null,   // 🔥 return ID clearly
-      report: c.reportId || null          // (optional) full report
+      reportId: c.reportId?._id || null,
+      report: c.reportId || null         
     }));
 
     res.json(formatted);
@@ -48,7 +46,7 @@ export const getCaseById = async (req, res) => {
     const caseData = await Case.findById(req.params.id)
       .populate("patientId")
       .populate("assignedTo")
-      .populate("reportId");   // 🔥 FIX
+      .populate("reportId"); 
 
     if (!caseData) {
       return res.status(404).json({ message: "Case not found" });

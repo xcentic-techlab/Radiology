@@ -5,13 +5,11 @@ import { getTestsByDeptName } from "../controllers/testController.js";  // ⭐ A
 
 const router = express.Router();
 
-// Get all tests
 router.get("/", async (req, res) => {
   const tests = await Test.find().populate("department");
   res.json(tests);
 });
 
-// Get tests of one department (by dept id)
 router.get("/department/:id", async (req, res) => {
   try {
     const tests = await Test.find({ department: req.params.id });
@@ -21,7 +19,6 @@ router.get("/department/:id", async (req, res) => {
   }
 });
 
-// Get tests by department NAME
 router.get("/by-dept-name/:name", getTestsByDeptName);
 
 

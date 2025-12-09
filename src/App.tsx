@@ -9,10 +9,8 @@ import { useAuthStore } from "@/store/authStore";
 import { useEffect } from "react";
 import { authService } from "@/api/auth.service";
 
-/* ===== Pages ===== */
 import Login from "@/pages/Login";
 
-/* ADMIN */
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Users from "@/pages/admin/Employee";
 import Departments from "@/pages/admin/Departments";
@@ -25,11 +23,9 @@ import UsersFilter from "@/pages/admin/UsersFilter";
 import DepartmentTests from "@/pages/department/DepartmentTests";
 import AdminReports from "@/pages/admin/AdminReports";
 
-/* RECEPTION */
 import ReceptionDashboard from "@/pages/reception/ReceptionDashboard";
 import Patients from "@/pages/reception/Patients";
 
-/* DEPARTMENT */
 import DepartmentDashboard from "@/pages/department/DepartmentDashboard";
 import Cases from "@/pages/department/Cases";
 import CreateReport from "@/pages/department/CreateReport";
@@ -37,19 +33,15 @@ import ReportDetail from "@/pages/department/ReportDetail";
 import ReportsList from "@/pages/department/ReportsList";
 import CreateCase from "@/pages/department/CreateCase";
 
-/* PATIENT */
 import PatientReports from "@/pages/patient/PatientReports";
 import PatientReportDetail from "@/pages/patient/ReportDetail";
 
-/* OTHER */
 import NotFound from "@/pages/NotFound";
 
-/* Layout */
 import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
 
-/* Redirect on ROOT */
 const RootRedirect = () => {
   const { user, isAuthenticated } = useAuthStore();
 
@@ -107,8 +99,6 @@ useEffect(() => {
 
           {/* LOGIN */}
           <Route path="/login" element={<Login />} />
-
-          {/* ===================== ADMIN ROUTES ===================== */}
           <Route
             path="/admin/dashboard"
             element={
@@ -248,8 +238,6 @@ useEffect(() => {
               </ProtectedRoute>
             }
           />
-
-          {/* ===================== RECEPTION ROUTES ===================== */}
           <Route
             path="/reception/dashboard"
             element={
@@ -275,8 +263,6 @@ useEffect(() => {
               </ProtectedRoute>
             }
           />
-
-          {/* ===================== DEPARTMENT ROUTES ===================== */}
           <Route
             path="/department/dashboard"
             element={
@@ -350,8 +336,6 @@ useEffect(() => {
               </Layout>
             }
           />
-
-          {/* ===================== PATIENT ROUTES ===================== */}
           <Route
             path="/patient/reports"
             element={

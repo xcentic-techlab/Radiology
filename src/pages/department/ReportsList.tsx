@@ -108,17 +108,33 @@ const ReportsList = () => {
                       </Button>
 
                       {report.reportFile?.url && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="ml-2"
-                          onClick={() =>
-                            window.open(report.reportFile.url, "_blank")
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-2"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(report.reportFile.url);
+                            const blob = await response.blob();
+                            const blobUrl = window.URL.createObjectURL(blob);
+
+                            const link = document.createElement("a");
+                            link.href = blobUrl;
+                            link.download = report.reportFile.filename || "report.pdf";
+                            document.body.appendChild(link);
+                            link.click();
+
+                            window.URL.revokeObjectURL(blobUrl);
+                            document.body.removeChild(link);
+                          } catch (err) {
+                            console.error("Download error:", err);
                           }
-                        >
-                          PDF
-                        </Button>
-                      )}
+                        }}
+                      >
+                        PDF
+                      </Button>
+                    )}
+
                     </TableCell>
                   </TableRow>
                 ))}

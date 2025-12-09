@@ -33,8 +33,6 @@ export default function DepartmentWorkload() {
       );
 
       setReports(depReports);
-
-      // fetch unique patient details
       const uniquePatientIds = [
         ...new Set(
           depReports

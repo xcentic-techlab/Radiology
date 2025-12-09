@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 
 const testSchema = new mongoose.Schema({
-  itemid: { type: Number },     // Excel itemid
+  itemid: { type: Number },
   name: { type: String, required: true },
-  price: Number,                // MRP
-  offerRate: Number,            // Offer
-  code: String,                 // Test code
-
-  // ADD THIS — very important
+  price: Number,
+  offerRate: Number,            
+  code: String,                 
   departmentName: {
     type: String,
     required: true,
@@ -15,7 +13,6 @@ const testSchema = new mongoose.Schema({
     trim: true
   },
 
-  // existing link
   department: { 
     type: mongoose.Schema.Types.ObjectId,
     ref: "Department",

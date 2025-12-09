@@ -81,7 +81,6 @@ const fetchReports = async () => {
   function applyFilters() {
     let data = [...reports];
 
-    // 🔍 SEARCH (case number + patient name)
     if (search.trim()) {
       data = data.filter(
         (r) =>
@@ -92,26 +91,20 @@ const fetchReports = async () => {
       );
     }
 
-    // 🔢 CASE NUMBER FILTER
     if (filterCase.trim()) {
       data = data.filter((r) =>
         r.caseNumber.toLowerCase().includes(filterCase.toLowerCase())
       );
     }
 
-    // STATUS FILTER
     if (filterStatus !== "all") {
       data = data.filter((r) => r.status === filterStatus);
     }
-
-    // DEPARTMENT FILTER
     if (filterDept !== "all") {
       data = data.filter(
         (r) => r.department?.name?.toLowerCase() === filterDept.toLowerCase()
       );
     }
-
-    // DATE FILTERING
     if (filterDate !== "all") {
       const now = new Date();
 
@@ -155,26 +148,19 @@ const fetchReports = async () => {
     <>
       <div className="space-y-6">
         
-        {/* HEADER */}
         <div>
           <h1 className="text-3xl font-semibold">All Reports</h1>
           <p className="text-muted-foreground">Monitor and filter all reports</p>
         </div>
 
-        {/* FILTERS PANEL */}
         <div className="bg-white p-4 rounded-lg border shadow-sm space-y-4">
-
-          {/* GRID FILTERS */}
           <div className="grid grid-cols-3 gap-4">
-
-            {/* CASE NUMBER FILTER */}
             <Input
               placeholder="Filter by Case Number..."
               value={filterCase}
               onChange={(e) => setFilterCase(e.target.value)}
             />
 
-            {/* STATUS */}
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -185,8 +171,6 @@ const fetchReports = async () => {
               <option value="report_uploaded">Report Uploaded</option>
               <option value="pending">Pending</option>
             </select>
-
-            {/* DATE FILTER */}
             <select
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
@@ -200,8 +184,6 @@ const fetchReports = async () => {
               <option value="month">Last 30 Days</option>
               <option value="custom">Custom</option>
             </select>
-
-            {/* CUSTOM DATE PICKER */}
             {filterDate === "custom" && (
               <>
                 <input
@@ -219,8 +201,6 @@ const fetchReports = async () => {
 
           </div>
         </div>
-
-        {/* REPORTS TABLE */}
         <div className="bg-white rounded-lg border shadow-sm p-4">
           <Table>
             <TableHeader>

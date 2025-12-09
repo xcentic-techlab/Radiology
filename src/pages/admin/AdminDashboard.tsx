@@ -109,8 +109,6 @@ const [deptReportCounts, setDeptReportCounts] = useState({});
   async function loadDeptReportCounts() {
   try {
     const reports = await reportsService.getAllForAdmin();
-
-    // Group by department
     const map = {};
 
     reports.forEach(r => {
@@ -142,9 +140,6 @@ useEffect(() => {
 
   return (
     <>
-
-
-      {/* HEADER */}
       <div className="text-center space-y-2 mt-6">
         <h1 className="text-4xl font-bold tracking-tight text-slate-900">
           Admin Dashboard
@@ -154,7 +149,6 @@ useEffect(() => {
         </p>
       </div>
 
-      {/* UPDATED UI CARDS (Screenshot style) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
 
         {CARDS.map((c, index) => (
@@ -189,13 +183,9 @@ useEffect(() => {
         ))}
 
       </div>
-
-      {/* DEPARTMENT SELECT MODAL */}
       {openDeptModal && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl relative">
-
-      {/* CLOSE ICON */}
       <button
         onClick={() => setOpenDeptModal(false)}
         className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200"
@@ -225,8 +215,6 @@ useEffect(() => {
       "
     >
       <span>{d.name}</span>
-
-      {/* Report Count Badge */}
       <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
         {deptReportCounts[d._id] || 0}
       </span>
@@ -254,8 +242,6 @@ useEffect(() => {
 {revenueModal && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div className="bg-white rounded-2xl p-6 w-[360px] shadow-xl relative">
-
-      {/* CLOSE ICON */}
       <button
         onClick={() => setRevenueModal(false)}
         className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200"

@@ -1,4 +1,3 @@
-// src/pages/department/CreateCase.tsx
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -25,14 +24,12 @@ import { casesService } from "@/api/case.service";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/authStore";
 
-// ------------------- VALIDATION ------------------- //
 
 const caseSchema = z.object({
   patient: z.string().min(1, "Patient is required"),
   assignedTo: z.string().optional()
 });
 
-// Small UI component
 const Info = ({ label, value }) => (
   <div>
     <Label className="text-muted-foreground">{label}</Label>
@@ -65,8 +62,6 @@ const CreateCase = () => {
   });
 
   const selectedPatient = watch("patient");
-
-  // Fetch patients + users
 useEffect(() => {
   (async () => {
     try {
@@ -74,14 +69,10 @@ useEffect(() => {
         user?.department?._id ||
         localStorage.getItem("departmentId");
 
-      console.log("🔥 Using Department ID:", deptId);
 
       if (!deptId) {
-        console.log("❌ DEPT ID UNDEFINED — STOPPING");
         return;
       }
-
-      // fetch data with SAFE deptId
       const patientsData = await patientsService.getDepartmentPatientDetails(deptId);
       const usersData = await usersService.getAll();
       const casesData = await casesService.getByDepartment(deptId);
@@ -110,7 +101,7 @@ useEffect(() => {
       setUsers(usersData);
 
     } catch (err) {
-      console.error("❌ ERROR WHILE LOADING:", err);
+      console.error("ERROR WHILE LOADING:", err);
       toast({
         title: "Error",
         description: "Failed to load data",
@@ -121,11 +112,6 @@ useEffect(() => {
     }
   })();
 }, []);
-
-
-
-
-  // Fetch Patient Details
   useEffect(() => {
     if (!selectedPatient) return setPatientInfo(null);
 
@@ -146,8 +132,6 @@ useEffect(() => {
       }
     })();
   }, [selectedPatient]);
-
-  // Filter department users
   useEffect(() => {
     if (!users.length || !user?.department?._id) return;
     const deptUsers = users.filter(
@@ -157,8 +141,6 @@ useEffect(() => {
     );
     setFilteredUsers(deptUsers);
   }, [users]);
-
-  // SUBMIT
   const onSubmit = async (data) => {
     setIsSubmitting(true);
 
@@ -197,15 +179,12 @@ return (
   <>
     <div className="max-w-3xl mx-auto space-y-10">
 
-      {/* PAGE TITLE */}
       <div className="text-center space-y-1">
         <h1 className="text-4xl font-bold text-slate-800 tracking-tight">Create Case</h1>
         <p className="text-muted-foreground text-sm">
           Open a new case for a patient
         </p>
       </div>
-
-      {/* MAIN CARD */}
       <Card className="bg-white/60 backdrop-blur-md border border-white/40 shadow-xl rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl font-semibold">
@@ -216,7 +195,6 @@ return (
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-            {/* PATIENT SELECT */}
             <div className="space-y-2">
               <Label className="font-medium">Select Patient *</Label>
               <Select
@@ -242,8 +220,6 @@ return (
                 </SelectContent>
               </Select>
             </div>
-
-            {/* PATIENT INFORMATION CARD */}
             {patientInfo && (
               <Card className="rounded-xl bg-white/70 backdrop-blur-md shadow-md border border-white/40">
                 <CardHeader>
@@ -281,7 +257,6 @@ return (
 /> */}
 
 
-                  {/* PAYMENT STATUS */}
                   <div>
                     <Label className="text-muted-foreground">Payment Status</Label>
                     <p
@@ -296,7 +271,6 @@ return (
                   <Info label="Govt ID Type" value={patientInfo.govtId?.idType} />
                   <Info label="Govt ID Number" value={patientInfo.govtId?.idNumber} />
 
-                  {/* CASE DESCRIPTION */}
                   <div className="col-span-2">
                     <Label className="text-muted-foreground">Case Description</Label>
                     <p className="mt-1 bg-white/40 p-2 rounded-xl backdrop-blur-sm shadow-sm text-sm">
@@ -308,7 +282,6 @@ return (
               </Card>
             )}
 
-            {/* ACTIONS */}
             <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"

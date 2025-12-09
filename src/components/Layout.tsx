@@ -4,24 +4,16 @@ import Topbar from "@/components/layout/Topbar";
 const Layout = ({ children }) => {
   return (
     <div className="flex h-screen w-screen bg-gray-50 overflow-hidden">
-      
-      {/* SIDEBAR */}
+    
       <Sidebar />
-
-      {/* RIGHT MAIN PANEL */}
       <div className="flex-1 flex flex-col overflow-y-auto">
 
-        {/* TOPBAR - sticky not fixed */}
         <div className="sticky top-0 z-20 bg-white shadow-sm">
           <Topbar />
         </div>
-
-        {/* PAGE CONTENT (normal scroll) */}
         <main className="p-6 flex-1">
           {children}
         </main>
-
-        {/* FOOTER  */}
         <footer className="text-center py-3 text-sm bg-white border-t">
           <a
             href="https://xcentic.com/"

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Power, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { UploadToast } from "@/components/ui/upload-toast";
 import {
   Table,
   TableBody,
@@ -137,36 +138,58 @@ const [deleteLoading, setDeleteLoading] = useState(false);
     }
   } 
 
+
+
+
 async function handleExcelUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (!["application/vnd.ms-excel", 
-       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"].includes(file.type)) {
+  if (
+    ![
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ].includes(file.type)
+  ) {
     return toast({
       title: "Invalid File",
-      description: "Please upload a valid Excel file (.xls or .xlsx)",
-      variant: "destructive"
+      description: "Please upload .xls or .xlsx only",
+      variant: "destructive",
     });
   }
 
   const form = new FormData();
   form.append("file", file);
-
-  toast({ title: "Uploading...", description: "Please wait." });
+  const uploadingToast = toast({
+    title: "",
+    description: <UploadToast />,
+    duration: Infinity,
+  });
 
   try {
-    // await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/upload-excel`, form);
-    await axios.post(`/admin/upload-excel`, form);
+    const res = await axios.post(
+      // await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/upload-excel`, form);
+      `/admin/upload-excel`,
+      form,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
-    toast({ title: "Success", description: "Excel uploaded successfully!" });
+    uploadingToast.dismiss?.();
 
-    await fetchDepartments(); // Refresh automatically
-
-  } catch (err) {
     toast({
-      title: "Upload failed",
-      description: "Something went wrong.",
+      title: "Upload Successful",
+      description: "Departments & Tests imported successfully!",
+    });
+
+    fetchDepartments();
+  } catch (err) {
+    uploadingToast.dismiss?.();
+
+    toast({
+      title: "Upload Failed",
+      description: err.response?.data?.message || "Something went wrong.",
       variant: "destructive",
     });
   }
@@ -213,19 +236,14 @@ async function handleExcelUpload(e) {
 )}
 
       <div className="space-y-6">
-{/* HEADER */}
 <div className="flex items-center justify-between flex-wrap gap-4">
 
-  {/* LEFT TEXT */}
   <div>
     <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
     <p className="text-muted-foreground">Manage hospital departments</p>
   </div>
-
-  {/* RIGHT SIDE (BUTTON + EXCEL CARD) */}
   <div className="flex items-center gap-4 flex-wrap">
 
-    {/* ADD BUTTON */}
     <Button
       onClick={() => setDialogOpen(true)}
       className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
@@ -233,7 +251,6 @@ async function handleExcelUpload(e) {
       Add Department
     </Button>
 
-    {/* EXCEL UPLOAD CARD */}
    <div className="p-3 border rounded-xl bg-white/60 backdrop-blur shadow-md w-[230px]">
   <label
     htmlFor="excel-upload"
@@ -262,11 +279,8 @@ async function handleExcelUpload(e) {
   </div>
 </div>
 
-        {/* GLASS CARD */}
         <Card className="backdrop-blur-lg bg-white/60 rounded-2xl border border-white/40 shadow-xl">
           <CardHeader>
-
-            {/* SEARCH */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -277,7 +291,6 @@ async function handleExcelUpload(e) {
               />
             </div>
 
-            {/* STATUS FILTER */}
             <div className="w-48">
               <select
                 value={filterStatus}
@@ -299,7 +312,7 @@ async function handleExcelUpload(e) {
                   <TableHead>Dept ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
-                  {/* <TableHead>Description</TableHead> */}
+
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
 
@@ -357,7 +370,6 @@ async function handleExcelUpload(e) {
 <TableCell className="text-right">
   <div className="flex justify-end items-center gap-3">
 
-    {/* VIEW TESTS BUTTON */}
     <Button
       variant="outline"
       size="sm"
@@ -367,7 +379,6 @@ async function handleExcelUpload(e) {
       View Tests
     </Button>
 
-    {/* TOGGLE ACTIVE */}
     <Button
       variant="ghost"
       size="icon"
@@ -377,7 +388,6 @@ async function handleExcelUpload(e) {
       <Power className="h-4 w-4 text-gray-700" />
     </Button>
 
-    {/* DELETE BUTTON */}
     <button
       onClick={() => setDeleteTarget(dept)}
       className="

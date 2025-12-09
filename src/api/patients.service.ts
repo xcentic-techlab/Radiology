@@ -44,7 +44,6 @@ selectedTests?: {
 
 
 export const patientsService = {
-  // 🟢 Already hoga
   list: async () => {
     const res = await api.get("/patients");
     return res.data;
@@ -54,8 +53,6 @@ export const patientsService = {
     const res = await api.get(`/patients/${id}`);
     return res.data;
   },
-
-  // 🆕 YEH NAYA FUNCTION ADD KARO
   update: async (id: string, data: any) => {
     const res = await api.put(`/patients/${id}`, data);
     return res.data;

@@ -29,10 +29,9 @@ export async function createReport(req, res) {
 
     await r.save();
 
-    // ⭐ IMPORTANT FIX — UPDATE CASE CORRECTLY
     await Case.findByIdAndUpdate(caseId, {
       reportId: r._id,
-      status: "pending"   // or "approved" if you want auto approve
+      status: "pending" 
     });
 
     const populated = await r.populate(
@@ -52,8 +51,7 @@ export async function createReport(req, res) {
 
 
 export async function uploadReportFile(req, res){
-  // department or admin uploads report PDF
-  const { id } = req.params; // report id
+  const { id } = req.params; 
   const file = req.file;
   if(!file) return res.status(400).json({ message: "No file" });
 
@@ -69,7 +67,6 @@ export async function uploadReportFile(req, res){
   r.status = "report_uploaded";
   await r.save();
 
-  // notify patient / reception / admin
   emitToRoom(`patient_${r.patient}`, "report_uploaded", r);
   emitToRoom(`department_${r.department}`, "report_uploaded", r);
   emitToRoom("admin_room", "report_uploaded", r);
@@ -87,10 +84,8 @@ export async function changeStatus(req, res){
   const r = await Report.findByIdAndUpdate(id, { status }, { new: true });
   if(!r) return res.status(404).json({ message: "Not found" });
 
-  // emit updates
   emitToRoom(`department_${r.department}`, "status_changed", r);
   emitToRoom(`patient_${r.patient}`, "status_changed", r);
-  // save notification
   const note = await Notification.create({
     title: `Status changed to ${status}`,
     message: `Case ${r.caseNumber} is now ${status}`,
@@ -110,7 +105,6 @@ export async function getReport(req, res){
 }
 
 export async function listReports(req, res){
-  // filters: department, status, patientId
   const q = {};
   if(req.query.department) q.department = req.query.department;
   if(req.query.status) q.status = req.query.status;

@@ -28,10 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import axiosAPI from "@/api/axios";
 
-
-/* --------------------------------------------------- */
-/* 🛑 ZOD VALIDATION                                   */
-/* --------------------------------------------------- */
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -53,9 +49,6 @@ const schema = z.object({
     selectedTest: z.string({
   required_error: "Please select a test",
 }),
-
-
-  /* Optional fields — untouched */
   email: z.string().email().optional(),
   referredDoctor: z.string().optional(),
 
@@ -63,12 +56,6 @@ const schema = z.object({
   govtIdNumber: z.string().optional(),
 });
 
-
-
-
-/* --------------------------------------------------- */
-/*  MAIN COMPONENT                                     */
-/* --------------------------------------------------- */
 export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   const { toast } = useToast();
   const [isLoading, setLoading] = useState(false);
@@ -94,10 +81,6 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
   } = useForm({
     resolver: zodResolver(schema),
   });
-
-  /* --------------------------------------------------- */
-  /*  UPLOAD GOVT FILE TO CLOUDINARY                    */
-  /* --------------------------------------------------- */
   const uploadGovIdFile = async () => {
     if (!govtFile) return;
     const url = await uploadService.uploadGovId(govtFile);
@@ -112,16 +95,9 @@ export default function CreatePatientDialog({ open, onClose, onSuccess }) {
 //  const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tests/by-dept-name/${deptName.toLowerCase()}`);
 const res = await axiosAPI.get(`/tests/by-dept-name/${deptName.toLowerCase()}`);
 
-console.log("TESTS RESPONSE:", res.data);
 
   setTests(res.data);
 };
-
-
-
-  /* --------------------------------------------------- */
-  /*  FORM SUBMIT                                       */
-  /* --------------------------------------------------- */
 const submit = async (data) => {
   setLoading(true);
 
@@ -154,7 +130,6 @@ const submit = async (data) => {
           : null,
     };
 
-    // ⭐ Parse and add selected test
     const selectedTestParsed = data.selectedTest
       ? JSON.parse(data.selectedTest)
       : null;
@@ -169,17 +144,10 @@ const submit = async (data) => {
         deptid: selectedTestParsed.deptid, 
       },
     ];
-
-    // ADD THIS FIX
 payload.departmentAssignedTo = departments.find(
   d => d.name.trim().toLowerCase() === data.assignedDepartment.trim().toLowerCase()
 )?._id || null;
 
-console.log("PAYLOAD SENT =", payload);
-
-
-    // 👉👉 YAHAN PRINT KARO
-    console.log("PAYLOAD SENT =", payload);
 
     await patientsService.create(payload);
 
@@ -201,9 +169,6 @@ console.log("PAYLOAD SENT =", payload);
 };
 
 
-  // console.log("FORM DATA =>", data);
-
-
   return (
 <Dialog open={open} onOpenChange={onClose}>
 <DialogContent
@@ -212,7 +177,7 @@ console.log("PAYLOAD SENT =", payload);
     max-h-[92vh]
     overflow-y-scroll scrollbar-hide
     rounded-2xl bg-white shadow-xl
-    pt-2 px-6 pb-6      /* ⭐ very low top padding */
+    pt-2 px-6 pb-6     
   "
 >
 
@@ -229,203 +194,162 @@ console.log("PAYLOAD SENT =", payload);
   onSubmit={handleSubmit(submit)} 
   className="
     grid grid-cols-1 md:grid-cols-2
-    gap-2             /* ⭐ Larger spacing between fields */
+    gap-2
     text-sm
     w-full
   "
 >
 
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <InputField label="First Name*" {...register("firstName")} error={errors.firstName?.message} />
+    <InputField label="Last Name*" {...register("lastName")} error={errors.lastName?.message} />
+  </div>
 
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <InputField label="Age*" type="number" {...register("age")} error={errors.age?.message} />
+    <SelectField
+      label="Gender*"
+      items={["male", "female", "other"]}
+      onChange={(v) => setValue("gender", v)}
+      error={errors.gender?.message}
+    />
+  </div>
 
-      {/* FIRST + LAST NAME */}
-      <div className="grid grid-cols-2 gap-4">
-        <InputField label="First Name*" {...register("firstName")} error={errors.firstName?.message} />
-        <InputField label="Last Name*" {...register("lastName")} error={errors.lastName?.message} />
-      </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <InputField label="Phone*" {...register("phone")} error={errors.phone?.message} />
+    <InputField label="Email" {...register("email")} error={errors.email?.message} />
+  </div>
 
-      {/* AGE + GENDER */}
-      <div className="grid grid-cols-2 gap-4">
-        <InputField label="Age*" type="number" {...register("age")} error={errors.age?.message} />
-        <SelectField
-          label="Gender*"
-          items={["male", "female", "other"]}
-          onChange={(v) => setValue("gender", v)}
-          error={errors.gender?.message}
-        />
-      </div>
+  <TextAreaField
+    label="Address*"
+    className="h-[60px]"
+    {...register("address")}
+    error={errors.address?.message}
+  />
 
-      {/* PHONE + EMAIL */}
-      <div className="grid grid-cols-2 gap-4">
-        <InputField label="Phone*" {...register("phone")} error={errors.phone?.message} />
-        <InputField label="Email" {...register("email")} error={errors.email?.message} />
-      </div>
+  <TextAreaField
+    label="Case Description*"
+    className="h-[60px]"
+    {...register("caseDescription")}
+    error={errors.caseDescription?.message}
+  />
 
-      {/* ADDRESS */}
-      <TextAreaField
-        label="Address*"
-        className="h-[60px]"
-        {...register("address")}
-        error={errors.address?.message}
-      />
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <SelectField
+      label="Case Type*"
+      items={["Urgent", "Emergency", "Routine", "STAT"]}
+      onChange={(v) => setValue("caseType", v)}
+      error={errors.caseType?.message}
+    />
 
-      {/* CASE DESCRIPTION */}
-      <TextAreaField
-        label="Case Description*"
-        className="h-[60px]"
-        {...register("caseDescription")}
-        error={errors.caseDescription?.message}
-      />
-
-      {/* CASE TYPE + REFERRED DOCTOR */}
-      <div className="grid grid-cols-2 gap-4">
-        <SelectField
-          label="Case Type*"
-          items={["Urgent", "Emergency", "Routine", "STAT"]}
-          onChange={(v) => setValue("caseType", v)}
-          error={errors.caseType?.message}
-        />
-
-        <InputField
-          label="Referred Doctor"
-          {...register("referredDoctor")}
-          error={errors.referredDoctor?.message}
-        />
-      </div>
-
-      {/* DEPARTMENT */}
-      {/* DEPARTMENT - LEFT SIDE */}
-<div className="col-span-1 space-y-1">
-  <Label>Assigned Department*</Label>
-
-  <Select
-    onValueChange={(v) => {
-      setValue("assignedDepartment", v);
-      loadTests(v);
-    }}
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select Department" />
-    </SelectTrigger>
-
-    <SelectContent>
-      {departments.map((dep) => (
-        <SelectItem key={dep._id} value={dep.name}>
-          {dep.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-
-  {errors.assignedDepartment && (
-    <p className="text-xs text-red-500">
-      {errors.assignedDepartment.message.toString()}
-    </p>
-  )}
-</div>
-
-{/* TEST - RIGHT SIDE */}
-{Array.isArray(tests) && tests.length > 0 && (
+    <InputField
+      label="Referred Doctor"
+      {...register("referredDoctor")}
+      error={errors.referredDoctor?.message}
+    />
+  </div>
   <div className="col-span-1 space-y-1">
-    <Label>Select Test*</Label>
+    <Label>Assigned Department*</Label>
 
     <Select
-      {...register("selectedTest")}
-      onValueChange={(v) =>
-        setValue("selectedTest", v, { shouldValidate: true })
-      }
+      onValueChange={(v) => {
+        setValue("assignedDepartment", v);
+        loadTests(v);
+      }}
     >
       <SelectTrigger>
-        <SelectValue placeholder="Select Test" />
+        <SelectValue placeholder="Select Department" />
       </SelectTrigger>
 
       <SelectContent>
-        {tests.map((t) => (
-          <SelectItem key={t._id} value={JSON.stringify(t)}>
-            {t.itemid} — {t.name} — ₹{t.offerRate}
+        {departments.map((dep) => (
+          <SelectItem key={dep._id} value={dep.name}>
+            {dep.name}
           </SelectItem>
         ))}
       </SelectContent>
     </Select>
 
-    {errors.selectedTest && (
+    {errors.assignedDepartment && (
       <p className="text-xs text-red-500">
-        {errors.selectedTest.message.toString()}
+        {errors.assignedDepartment.message.toString()}
       </p>
     )}
   </div>
-)}
+  {Array.isArray(tests) && tests.length > 0 && (
+    <div className="col-span-1 space-y-1">
+      <Label>Select Test*</Label>
 
+      <Select
+        {...register("selectedTest")}
+        onValueChange={(v) =>
+          setValue("selectedTest", v, { shouldValidate: true })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select Test" />
+        </SelectTrigger>
 
+        <SelectContent>
+          {tests.map((t) => (
+            <SelectItem key={t._id} value={JSON.stringify(t)}>
+              {t.itemid} — {t.name} — ₹{t.offerRate}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
+      {errors.selectedTest && (
+        <p className="text-xs text-red-500">
+          {errors.selectedTest.message.toString()}
+        </p>
+      )}
+    </div>
+  )}
 
-      
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <SelectField
+      label="Govt ID Type*"
+      items={["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"]}
+      onChange={(v) => setValue("govtIdType", v)}
+      error={errors.govtIdType?.message}
+    />
 
-      {/* Govt ID TYPE + NUMBER */}
-      <div className="grid grid-cols-2 gap-4">
-        <SelectField
-          label="Govt ID Type*"
-          items={["Aadhaar", "PAN", "VoterID", "DrivingLicense", "Passport"]}
-          onChange={(v) => setValue("govtIdType", v)}
-          error={errors.govtIdType?.message}
-        />
+    <InputField
+      label="Govt ID Number*"
+      {...register("govtIdNumber")}
+      error={errors.govtIdNumber?.message}
+    />
+  </div>
 
-        <InputField
-          label="Govt ID Number*"
-          {...register("govtIdNumber")}
-          error={errors.govtIdNumber?.message}
-        />
-      </div>
+  <div>
+    <Label>Upload Govt ID</Label>
+    <Input type="file" onChange={(e) => setGovtFile(e.target.files?.[0] || null)} />
 
-      {/* GOVT FILE UPLOAD */}
-      <div>
-        <Label>Upload Govt ID</Label>
-        <Input type="file" onChange={(e) => setGovtFile(e.target.files?.[0] || null)} />
+    {govtFile && (
+      <Button type="button" className="mt-2 w-full" onClick={uploadGovIdFile}>
+        Upload to Cloudinary
+      </Button>
+    )}
+    {fileUrl && <p className="text-green-600 text-sm">Uploaded</p>}
+  </div>
 
-        {govtFile && (
-          <Button type="button" className="mt-2 w-full" onClick={uploadGovIdFile}>
-            Upload to Cloudinary
-          </Button>
-        )}
-        {fileUrl && <p className="text-green-600 text-sm">Uploaded</p>}
-      </div>
+  {/* BUTTONS */}
+  <div className="flex flex-col sm:flex-row justify-between gap-2 col-span-2 pt-2">
+    <Button type="button" variant="outline" onClick={onClose} className="px-6 w-full sm:w-auto">
+      Cancel
+    </Button>
+    <Button type="submit" disabled={isLoading} className="bg-blue-600 text-white px-6 w-full sm:w-auto">
+      Register
+    </Button>
+  </div>
+</form>
 
-      {/* ACTION BUTTONS */}
-<div className="flex justify-between items-center col-span-2 pt-2">
-  
-  {/* LEFT SIDE BUTTON */}
-  <Button
-    type="button"
-    variant="outline"
-    onClick={onClose}
-    className="px-6"
-  >
-    Cancel
-  </Button>
-
-  {/* RIGHT SIDE BUTTON */}
-  <Button
-    type="submit"
-    disabled={isLoading}
-    className="bg-blue-600 text-white px-6"
-  >
-    Register
-  </Button>
-
-</div>
-
-
-    </form>
   </DialogContent>
 </Dialog>
 
   );
 }
-
-
-
-/* --------------------------------------------------- */
-/*  FIELD COMPONENTS                                   */
-/* --------------------------------------------------- */
 
 const InputField = forwardRef<HTMLInputElement, any>(
   ({ label, error, className, ...props }, ref) => (
@@ -436,9 +360,9 @@ const InputField = forwardRef<HTMLInputElement, any>(
         ref={ref}
         {...props}
         className={`
-          h-8 w-full          /* compact size */
+          h-8 w-full
           rounded-lg
-          text-sm             /* smaller font */
+          text-sm             
           px-2
           ${className}
         `}

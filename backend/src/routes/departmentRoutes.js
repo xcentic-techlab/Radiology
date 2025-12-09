@@ -48,13 +48,8 @@ router.post("/", auth, permit("super_admin", "admin"), createDepartment);
 router.put("/:id", auth, permit("super_admin", "admin"), updateDepartment);
 router.delete("/:id", auth, permit("super_admin", "admin"), deleteDepartment);
 
-/**********************************
- *  GET ALL PATIENTS OF THIS DEPT
- **********************************/
 router.get("/:deptId/patients", auth, async (req, res) => {
   try {
-    
-    // 🛑 FIX — Agar deptId undefined hai → empty array return karo
     if (!req.params.deptId || req.params.deptId === "undefined") {
       return res.json([]);
     }
@@ -74,11 +69,6 @@ router.get("/:deptId/patients", auth, async (req, res) => {
   }
 });
 
-
-/**********************************
- *  GET FULL DETAILS OF A PATIENT
- *  (Only If Assigned To This Dept)
- **********************************/
 router.get("/:id/details", auth, async (req, res) => {
   try {
     let patient = await Patient.findById(req.params.id)
@@ -93,15 +83,12 @@ router.get("/:id/details", auth, async (req, res) => {
     }
 
 
-    // ❗ BLOCK ACCESS FOR OTHER DEPARTMENTS
     if (
       patient.departmentAssignedTo?.toString() !==
       req.user.department?.toString()
     ) {
-      return res.status(403).json({ message: "❌ Access denied: Not your patient" });
+      return res.status(403).json({ message: "Access denied: Not your patient" });
     }
-
-    // MASK GOVT ID
     if (patient.govtId?.idNumber) {
       patient.govtId.idNumber =
         patient.govtId.idNumber.slice(-4).padStart(
@@ -117,21 +104,18 @@ router.get("/:id/details", auth, async (req, res) => {
   }
 });
 
-/**********************************
- *  UPDATE CLINICAL HISTORY
- **********************************/
+
 router.put("/:id/update-history", auth, async (req, res) => {
   try {
     const check = await Patient.findById(req.params.id);
     if (!check) return res.status(404).json({ message: "Patient not found" });
 
-    // ❗ ACCESS VALIDATION
     if (
       req.user.role !== "admin" &&
       req.user.role !== "super_admin" &&
       check.departmentAssignedTo?.toString() !== req.user.department?.toString()
     ) {
-      return res.status(403).json({ message: "❌ You cannot edit this patient" });
+      return res.status(403).json({ message: "You cannot edit this patient" });
     }
 
 
@@ -143,28 +127,23 @@ router.put("/:id/update-history", auth, async (req, res) => {
       { new: true }
     );
 
-    res.json({ message: "📝 History updated", patient });
+    res.json({ message: "History updated", patient });
   } catch (err) {
     console.error("Update History Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/**********************************
- *  ADD ATTACHMENT
- **********************************/
 router.post("/:id/add-attachment", auth, async (req, res) => {
   try {
     const check = await Patient.findById(req.params.id);
     if (!check) return res.status(404).json({ message: "Patient not found" });
-
-    // ❗ ACCESS VALIDATION
     if (
       req.user.role !== "admin" &&
       req.user.role !== "super_admin" &&
       check.departmentAssignedTo?.toString() !== req.user.department?.toString()
     ) {
-      return res.status(403).json({ message: "❌ Not allowed" });
+      return res.status(403).json({ message: "Not allowed" });
     }
 
     const { fileName, fileUrl } = req.body;
@@ -175,7 +154,7 @@ router.post("/:id/add-attachment", auth, async (req, res) => {
       }
     });
 
-    res.json({ message: "📎 Attachment Added Successfully" });
+    res.json({ message: "Attachment Added Successfully" });
   } catch (err) {
     console.error("Attachment Error:", err);
     res.status(500).json({ message: "Server error" });

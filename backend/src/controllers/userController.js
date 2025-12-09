@@ -2,17 +2,12 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
 
-/**
- * GET all users (Admin)
- */
+
 export async function getAllUsers(req, res) {
   const users = await User.find().select("-passwordHash").populate("department");
   res.json(users);
 }
 
-/**
- * GET user by ID
- */
 export async function getUserById(req, res) {
   const { id } = req.params;
   const user = await User.findById(id).select("-passwordHash").populate("department");
@@ -20,14 +15,10 @@ export async function getUserById(req, res) {
   res.json(user);
 }
 
-/**
- * Update user
- */
 export async function updateUser(req, res) {
   const { id } = req.params;
   const updates = req.body;
 
-  // Prevent changing password directly here
   delete updates.passwordHash;
 
   const user = await User.findByIdAndUpdate(id, updates, { new: true })
@@ -57,9 +48,6 @@ export const deleteUser = async (req, res) => {
 };
 
 
-/**
- * Deactivate user
- */
 export async function deactivateUser(req, res) {
   const { id } = req.params;
 
@@ -74,9 +62,6 @@ export async function deactivateUser(req, res) {
   res.json({ message: "User deactivated", user });
 }
 
-/**
- * Activate user
- */
 export async function activateUser(req, res) {
   const { id } = req.params;
 

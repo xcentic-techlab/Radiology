@@ -32,7 +32,7 @@ const PatientReports = () => {
 
   const loadReports = async () => {
     try {
-      const allReports = await reportsService.list(); // 🟢 correct backend function
+      const allReports = await reportsService.list();
 
       const myReports = allReports.filter(
         (r: any) => r.patient?._id === user?._id

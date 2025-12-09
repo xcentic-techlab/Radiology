@@ -76,11 +76,6 @@ const fetchStats = async () => {
     setLoading(false);
   }
 };
-
-
-
-
-  /** LOAD DEPARTMENTS */
   const fetchDepartments = async () => {
     try {
       const data = await departmentsService.getAll();
@@ -94,7 +89,6 @@ const fetchStats = async () => {
     }
   };
 
-  /** STAT CARDS */
 const statCards = [
   {
     title: "Patient Overview",
@@ -123,8 +117,7 @@ const statCards = [
   return (
     <>
       <div className="space-y-8">
-        
-        {/* HEADER */}
+      
         <div className="text-center">
           <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
             Reception Dashboard
@@ -133,8 +126,6 @@ const statCards = [
             Manage patient registrations & payments
           </p>
         </div>
-
-        {/* STATS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
   {statCards.map((card, index) => (
     <motion.div
@@ -176,8 +167,6 @@ const statCards = [
 </div>
 
       </div>
-
-{/* PATIENT OVERVIEW POPUP */}
 {showOverview && (
   <motion.div
     className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
@@ -190,7 +179,6 @@ const statCards = [
       transition={{ type: "spring", stiffness: 120, damping: 15 }}
       className="bg-white max-w-md w-full rounded-2xl shadow-xl p-6"
     >
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Patient Overview</h2>
         <X
@@ -198,8 +186,6 @@ const statCards = [
           onClick={() => setShowOverview(false)}
         />
       </div>
-
-      {/* Options */}
       <div className="space-y-3">
         {[
           { label: "Today's Patients", value: "24h" },
@@ -220,8 +206,6 @@ const statCards = [
           </button>
         ))}
       </div>
-
-      {/* CANCEL BUTTON */}
       <button
         onClick={() => setShowOverview(false)}
         className="
@@ -236,8 +220,6 @@ const statCards = [
     </motion.div>
   </motion.div>
 )}
-
-      {/* SELECT DEPARTMENT POPUP */}
       {selectDeptOpen && (
         <motion.div
           className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4"
@@ -307,8 +289,6 @@ const statCards = [
           </motion.div>
         </motion.div>
       )}
-
-      {/* QUICK ADD PATIENT FORM */}
       <CreatePatientDialog
         open={quickAdd}
         onClose={() => setQuickAdd(false)}
