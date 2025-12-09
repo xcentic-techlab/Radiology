@@ -169,7 +169,7 @@ async function handleExcelUpload(e) {
   try {
     const res = await axios.post(
       // await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/upload-excel`, form);
-      `/admin/upload-excel`,
+      `/api/admin/upload-excel`,
       form,
       {
         headers: { "Content-Type": "multipart/form-data" },
